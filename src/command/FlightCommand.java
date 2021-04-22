@@ -23,8 +23,8 @@ public class FlightCommand {
 
     public static void flightCommand(String command){
         // list all available flights ordered by departure time, then departure location name
-        if ("flights".equalsIgnoreCase(command)){
-            flightService.getAllFlight();
+        if ("flights".equals(command)){
+            flightService.getAllFlights();
             return;
         }
         String[] options = command.split(" ");
@@ -69,7 +69,7 @@ public class FlightCommand {
                         break;
                     // find flight by id
                     default:
-
+                        throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
                 }
             }
 

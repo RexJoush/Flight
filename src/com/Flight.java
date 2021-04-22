@@ -12,6 +12,11 @@ public class Flight {
     private int capacity;       // the capacity of the flight
     private int booked;         // the number of passengers who have checked tickets
 
+    @Override
+    public String toString() {
+        return source + " -> " + destination;
+    }
+
     //get the number of minutes this flight takes (round to nearest whole number)
     public int getDuration() {
         // return the time

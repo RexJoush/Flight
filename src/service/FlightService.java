@@ -22,7 +22,16 @@ public class FlightService {
     /**
      * list all available flights ordered by departure time, then departure location name
      */
-    public void getAllFlight() {
+    public void getAllFlights() {
+
+        System.out.println("-------------------------------------------------------");
+        System.out.println("ID   Departure   Arrival     Source --> Destination");
+        System.out.println("-------------------------------------------------------");
+        if (Data.flights.size() == 0){
+            System.out.println("(None)");
+            return;
+        }
+
         List<Flight> flights = new ArrayList<>();
         for (Map.Entry<Integer, Flight> entry : Data.flights.entrySet()) {
             flights.add(entry.getValue());
@@ -30,21 +39,19 @@ public class FlightService {
         flights.sort(new Comparator<>() {
             @Override
             public int compare(Flight f1, Flight f2) {
-                // 按年龄升序
+                // asc by week
                 String week1 = f1.getTime().split(" ")[0];
                 String week2 = f2.getTime().split(" ")[0];
 
                 int result = Week.valueOf(week1).getIndex() - Week.valueOf(week2).getIndex();
 
+                // if week same
                 if (result == 0) {
                     result = f1.getTime().split(" ")[1].compareTo(f2.getTime().split(" ")[1]);
                 }
                 return result;
             }
         });
-        System.out.println("-------------------------------------------------------");
-        System.out.println("ID   Departure   Arrival     Source --> Destination");
-        System.out.println("-------------------------------------------------------");
 
         for (Flight flight : flights) {
             System.out.printf("%4s %-9s   %-9s   %s --> %s\n", flight.getId(),
@@ -275,7 +282,7 @@ public class FlightService {
 
             while ((line = br.readLine()) != null) {
                 // contains the line format
-                if (CommonUtils.p.matcher(line).matches()) {
+                if (CommonUtils.pTime.matcher(line).matches()) {
                     // add flight
                     String[] split = line.split(",");
                     Flight flight = new Flight(Data.flights.size(), split[0], split[1], split[2], Integer.parseInt(split[3]), Integer.parseInt(split[4]));

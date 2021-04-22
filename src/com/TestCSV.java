@@ -24,7 +24,7 @@ public class TestCSV {
         Flight flight2 = new Flight(1, "Tuesday 20:35", "beijing", "shanghai", 100, 0);
         Data.flights.put(0, flight);
         Data.flights.put(1, flight2);
-        new TestCSV().writeCSV();
+        new TestCSV().readCSV();
 
 
     }
@@ -52,20 +52,22 @@ public class TestCSV {
 
     private void readCSV() throws IOException {
         // 1.创建 FileReader 对象，构造方法中绑定要读取的数据源
-        FileReader fr = new FileReader("flights6.csv");
+        FileReader fr = new FileReader("locations.csv");
         // 2.buffer reader
         BufferedReader br = new BufferedReader(fr);
 
         String line = "";
 
-
+        int index  = 0;
         while ((line = br.readLine()) != null) {
-            if (CommonUtils.p.matcher(line).matches()) {
+            if (CommonUtils.pLocation.matcher(line).matches()) {
                 System.out.println(line);
+                index++;
             } else {
                 System.out.println("error");
             }
         }
+        System.out.println(index);
 
         // 3.释放资源
         br.close();

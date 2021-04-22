@@ -56,6 +56,12 @@ public class Location {
 
     // generate
 
+
+
+
+	public Location() {
+	}
+
 	public String getName() {
 		return name;
 	}

@@ -25,6 +25,10 @@ public class TimeUtils {
             example:
                 Friday 12:00
                 Saturday 15:45
+        return
+            if time1 before time2 return value < 0
+            if time1 after time2 return value > 0
+
      */
     public static int getTimeDifferenceByTimeString(String time1, String time2) {
 
