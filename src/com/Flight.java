@@ -1,7 +1,6 @@
 package com;
 
-import database.Data;
-import util.TimeUtils;
+import util.Utils;
 
 public class Flight {
 
@@ -25,7 +24,7 @@ public class Flight {
 
     // get the flight arrived time
     public String getArrivedTime(){
-        return TimeUtils.getManyMinuteAfter(this.getTime(), this.getDuration());
+        return Utils.getManyMinuteAfter(this.getTime(), this.getDuration());
     }
 
     //implement the ticket price formula
@@ -49,10 +48,10 @@ public class Flight {
         double d = getDistance();
 
         // get demand of destination
-        double DTo = Data.locations.get(this.getDestination()).getDemand();
+        double DTo = Utils.locations.get(this.getDestination()).getDemand();
 
         // get demand of source
-        double DFrom = Data.locations.get(this.getSource()).getDemand();
+        double DFrom = Utils.locations.get(this.getSource()).getDemand();
 
         // calculate the ticket price
         return y * d / 100 * (30 + 4 * (DTo - DFrom));
@@ -82,10 +81,10 @@ public class Flight {
     //get the distance of this flight in km
     public double getDistance() {
         // get source location object
-        Location sourceLocation = Data.locations.get(this.source);
+        Location sourceLocation = Utils.locations.get(this.source);
 
         // get destination location object
-        Location destinationLocation = Data.locations.get(this.destination);
+        Location destinationLocation = Utils.locations.get(this.destination);
 
         // calculate the distance of two location
         return Location.distance(sourceLocation, destinationLocation);
@@ -93,7 +92,7 @@ public class Flight {
 
     //get the layover time, in minutes, between two flights
     public static int layover(Flight x, Flight y) {
-        return TimeUtils.getTimeDifferenceByTimeString(x.getTime(), y.getTime());
+        return Utils.getTimeDifferenceByTimeString(x.getTime(), y.getTime());
     }
 
 

@@ -1,7 +1,7 @@
 package entity;
 
 import com.Flight;
-import util.TimeUtils;
+import util.Utils;
 
 import java.util.List;
 
@@ -27,9 +27,6 @@ public class TravelDefinition {
     }
 
 
-    public TravelDefinition() {
-    }
-
     // the total travel duration
     public int getDuration(){
 
@@ -39,10 +36,10 @@ public class TravelDefinition {
                 duration = flights.get(0).getDuration();
                 break;
             case 2:
-                duration =  Math.abs(TimeUtils.getTimeDifferenceByTimeString(flights.get(0).getTime(), flights.get(1).getArrivedTime()));
+                duration =  Math.abs(Utils.getTimeDifferenceByTimeString(flights.get(0).getTime(), flights.get(1).getArrivedTime()));
                 break;
             case 3:
-                duration =  Math.abs(TimeUtils.getTimeDifferenceByTimeString(flights.get(0).getTime(), flights.get(2).getArrivedTime()));
+                duration =  Math.abs(Utils.getTimeDifferenceByTimeString(flights.get(0).getTime(), flights.get(2).getArrivedTime()));
                 break;
         }
         return duration;
@@ -65,11 +62,11 @@ public class TravelDefinition {
             case 1:
                 break;
             case 2:
-                layover = TimeUtils.getTimeDifferenceByTimeString(flights.get(1).getTime(), flights.get(0).getArrivedTime());
+                layover = Utils.getTimeDifferenceByTimeString(flights.get(1).getTime(), flights.get(0).getArrivedTime());
                 break;
             case 3:
-                layover = TimeUtils.getTimeDifferenceByTimeString(flights.get(1).getTime(), flights.get(0).getArrivedTime())
-                        + TimeUtils.getTimeDifferenceByTimeString(flights.get(2).getTime(), flights.get(1).getArrivedTime());
+                layover = Utils.getTimeDifferenceByTimeString(flights.get(1).getTime(), flights.get(0).getArrivedTime())
+                        + Utils.getTimeDifferenceByTimeString(flights.get(2).getTime(), flights.get(1).getArrivedTime());
                 break;
         }
         return layover;

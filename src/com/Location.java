@@ -1,6 +1,6 @@
 package com;
 
-import util.LocationUtils;
+import util.Utils;
 
 public class Location {
 
@@ -18,7 +18,7 @@ public class Location {
 
     //Implement the Haversine formula - return value in kilometres
     public static double distance(Location l1, Location l2) {
-		return LocationUtils.getDistance(l1.longitude, l1.latitude, l2.longitude, l2.latitude);
+		return Utils.getDistance(l1.longitude, l1.latitude, l2.longitude, l2.latitude);
 	}
 
     public void addArrival(Flight f) {
