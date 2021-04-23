@@ -1,7 +1,5 @@
 package com;
 
-import util.Utils;
-
 public class Flight {
 
     private int id;             // id

@@ -1,14 +1,9 @@
-package command;
+package com;
 
 /**
  * @author Rex Joush
  * @time 2021.04.20
  */
-
-import com.Flight;
-import com.Location;
-import entity.Week;
-import util.Utils;
 
 import java.io.*;
 import java.util.*;

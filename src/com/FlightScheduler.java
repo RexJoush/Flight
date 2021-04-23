@@ -1,9 +1,5 @@
 package com;
 
-import command.FlightCommand;
-import command.LocationCommand;
-import command.TravelCommand;
-
 import java.util.Scanner;
 
 public class FlightScheduler {

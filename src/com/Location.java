@@ -1,7 +1,5 @@
 package com;
 
-import util.Utils;
-
 public class Location {
 
 	private String name;		// location name

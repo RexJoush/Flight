@@ -1,7 +1,4 @@
-package entity;
-
-import com.Flight;
-import util.Utils;
+package com;
 
 import java.util.List;
 

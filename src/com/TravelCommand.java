@@ -1,13 +1,9 @@
-package command;
+package com;
 
 /**
  * @author Rex Joush
  * @time 2021.04.20
  */
-
-import com.Flight;
-import entity.TravelDefinition;
-import util.Utils;
 
 import java.util.*;
 

@@ -1,4 +1,4 @@
-package entity;
+package com;
 
 public enum Week {
     Monday("Monday", 1),

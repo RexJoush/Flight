@@ -1,13 +1,9 @@
-package util;
+package com;
 
 /**
  * @author Rex Joush
  * @time 2021.04.21
  */
-
-import com.Flight;
-import com.Location;
-import entity.Week;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
