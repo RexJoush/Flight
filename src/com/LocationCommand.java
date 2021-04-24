@@ -96,7 +96,8 @@ public class LocationCommand {
     public void addLocation(String[] options) {
         // check parameter number
         if (options.length != 6) {
-            throw new RuntimeException("Usage: LOCATION ADD <name> <lat> <long> <demand_coefficient>\n" +
+            throw new RuntimeException("Usage: \n"+
+                    "LOCATION ADD <name> <lat> <long> <demand_coefficient>\n" +
                     "Example: LOCATION ADD Sydney -33.847927 150.651786 0.2");
         }
 

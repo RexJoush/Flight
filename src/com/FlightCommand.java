@@ -134,7 +134,8 @@ public class FlightCommand {
 
         // check parameter number
         if (options.length != 7) {
-            throw new RuntimeException("Usage: FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+            throw new RuntimeException("Usage: \n" +
+                    "FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
                     "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
         }
 
