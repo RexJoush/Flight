@@ -369,8 +369,10 @@ public class FlightCommand {
             }
 
             System.out.println("Imported " + right + " flights.");
-            if (error > 0) {
+            if (error == 1) {
                 System.out.println(error + " line was invalid.");
+            } else {
+                System.out.println(error + " lines were invalid.");
             }
 
             // 3.release

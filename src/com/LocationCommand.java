@@ -206,7 +206,10 @@ public class LocationCommand {
             }
 
             System.out.println("Imported " + right + " locations.");
-            if (error > 0) {
+            if (error == 1) {
+                System.out.println(error + " line was invalid.");
+            }
+            if (error > 1) {
                 System.out.println(error + " lines were invalid.");
             }
 
