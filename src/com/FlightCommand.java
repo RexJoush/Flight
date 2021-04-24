@@ -134,17 +134,6 @@ public class FlightCommand {
                     "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
         }
 
-        int id = Utils.flights.size();
-        String time = options[2] + " " + options[3];
-
-        // check time format
-        if (!Utils.p.matcher(time).matches()) {
-            throw new RuntimeException("Invalid departure time. Use the format <day_of_week> <hour:minute>, with 24h time.");
-        }
-
-        // check runways
-        checkRunways(time, options[4]);
-
         // check source location
         String source = options[4];
         if (!Utils.locations.containsKey(source)) {
@@ -161,6 +150,17 @@ public class FlightCommand {
         if (source.equals(destination)) {
             throw new RuntimeException("Source and destination cannot be the same place.");
         }
+
+        int id = Utils.flights.size();
+        String time = options[2] + " " + options[3];
+
+        // check time format
+        if (!Utils.p.matcher(time).matches()) {
+            throw new RuntimeException("Invalid departure time. Use the format <day_of_week> <hour:minute>, with 24h time.");
+        }
+
+        // check runways
+        checkRunways(time, options[4]);
 
         // check capacity
         int capacity = 0;
