@@ -81,7 +81,7 @@ public class LocationCommand {
         List<String> locations = new ArrayList<>();
 
         for (Map.Entry<String, Location> entry : FlightScheduler.locations.entrySet()) {
-            locations.add(entry.getKey());
+            locations.add(entry.getValue().getName());
         }
         Collections.sort(locations);
 
@@ -102,7 +102,7 @@ public class LocationCommand {
 
         // check location have or not
         String name = options[2];
-        if (FlightScheduler.locations.containsKey(name)) {
+        if (FlightScheduler.locations.containsKey(name.toLowerCase())) {
             throw new RuntimeException("This location already exists.");
         }
 
@@ -141,7 +141,7 @@ public class LocationCommand {
 
         // new location add to database
         Location location = new Location(name, latitude, longitude, demand);
-        FlightScheduler.locations.put(name, location);
+        FlightScheduler.locations.put(name.toLowerCase(), location);
         System.out.println("Successfully added location " + name + ".");
 
     }
@@ -151,7 +151,7 @@ public class LocationCommand {
      * @param option command options
      */
     public void getLocationByName(String option) {
-        if (!FlightScheduler.locations.containsKey(option)) {
+        if (!FlightScheduler.locations.containsKey(option.toLowerCase())) {
             throw new RuntimeException("This location does not exist in the system.");
         }
         Location location = FlightScheduler.locations.get(option);
@@ -192,8 +192,8 @@ public class LocationCommand {
                     Location location = new Location(split[0], Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]));
 
                     // check location is in the database
-                    if (!FlightScheduler.locations.containsKey(split[0])) {
-                        FlightScheduler.locations.put(split[0], location);
+                    if (!FlightScheduler.locations.containsKey(split[0].toLowerCase())) {
+                        FlightScheduler.locations.put(split[0].toLowerCase(), location);
                         right++;
                     } else {
                         error++;
@@ -207,7 +207,7 @@ public class LocationCommand {
 
             System.out.println("Imported " + right + " locations.");
             if (error > 0) {
-                System.out.println(error + " line was invalid.");
+                System.out.println(error + " lines were invalid.");
             }
 
             // 3.release
@@ -260,7 +260,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!FlightScheduler.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1].toLowerCase())) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
@@ -295,7 +295,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!FlightScheduler.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1].toLowerCase())) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
@@ -329,7 +329,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!FlightScheduler.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1].toLowerCase())) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
