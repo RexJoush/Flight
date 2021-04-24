@@ -83,11 +83,7 @@ public class FlightCommand {
      */
     public void getAllFlights() {
 
-        if (FlightScheduler.flights.size() == 0){
-            System.out.println("(None)");
-            return;
-        }
-
+        System.out.println("Flights");
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Departure   Arrival     Source --> Destination");
         System.out.println("-------------------------------------------------------");
@@ -118,6 +114,9 @@ public class FlightCommand {
                     Utils.getPrintTime(flight.getTime()),
                     Utils.getPrintTime(flight.getArrivedTime()),
                     flight.getSource(), flight.getDestination());
+        }
+        if (FlightScheduler.flights.size() == 0){
+            System.out.println("(None)");
         }
 
     }

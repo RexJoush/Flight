@@ -73,6 +73,7 @@ public class LocationCommand {
     public void getAllLocations() {
 
         if (FlightScheduler.locations.size() == 0){
+            System.out.println("Locations (0):");
             System.out.println("(None)");
             return;
         }

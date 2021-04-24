@@ -107,6 +107,7 @@ public class FlightScheduler {
             } catch (RuntimeException e){
                 System.out.println(e.getMessage());
             }
+            System.out.println();
 
         }
     }
