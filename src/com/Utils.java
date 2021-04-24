@@ -15,11 +15,7 @@ import java.util.regex.Pattern;
  */
 public class Utils {
 
-    // all location in this list
-    public static Map<String, Location> locations = new HashMap<>();
 
-    // all flight in this list
-    public static Map<Integer, Flight> flights = new HashMap<>();
 
     public static DecimalFormat TimeFormat = new DecimalFormat("00");
     public static DecimalFormat doubleFormat = new DecimalFormat("#.00");

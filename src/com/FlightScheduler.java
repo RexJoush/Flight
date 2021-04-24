@@ -1,10 +1,17 @@
 package com;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class FlightScheduler {
 
     private static FlightScheduler instance;
+    // all location in this list
+    public static Map<String, Location> locations;
+
+    // all flight in this list
+    public static Map<Integer, Flight> flights;
     private final Scanner scanner = new Scanner(System.in);
 
     private final LocationCommand locationService = new LocationCommand();
@@ -12,6 +19,8 @@ public class FlightScheduler {
 
     public static void main(String[] args) {
         instance = new FlightScheduler(args);
+        locations = new HashMap<>();
+        flights = new HashMap<>();
         instance.run();
     }
 

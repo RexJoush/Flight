@@ -86,13 +86,13 @@ public class FlightCommand {
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Departure   Arrival     Source --> Destination");
         System.out.println("-------------------------------------------------------");
-        if (Utils.flights.size() == 0){
+        if (FlightScheduler.flights.size() == 0){
             System.out.println("(None)");
             return;
         }
 
         List<Flight> flights = new ArrayList<>();
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             flights.add(entry.getValue());
         }
         flights.sort(new Comparator<>() {
@@ -136,13 +136,13 @@ public class FlightCommand {
 
         // check source location
         String source = options[4];
-        if (!Utils.locations.containsKey(source)) {
+        if (!FlightScheduler.locations.containsKey(source)) {
             throw new RuntimeException("Invalid starting location.");
         }
 
         // check destination location
         String destination = options[5];
-        if (!Utils.locations.containsKey(destination)) {
+        if (!FlightScheduler.locations.containsKey(destination)) {
             throw new RuntimeException("Invalid ending location.");
         }
 
@@ -151,7 +151,7 @@ public class FlightCommand {
             throw new RuntimeException("Source and destination cannot be the same place.");
         }
 
-        int id = Utils.flights.size();
+        int id = FlightScheduler.flights.size();
         String time = options[2] + " " + options[3];
 
         // check time format
@@ -172,7 +172,7 @@ public class FlightCommand {
 
         Flight flight = new Flight(id, time, source, destination, capacity, 0);
 
-        Utils.flights.put(id, flight);
+        FlightScheduler.flights.put(id, flight);
         System.out.println("Successfully added Flight " + id + ".");
 
     }
@@ -186,7 +186,7 @@ public class FlightCommand {
     public void checkRunways(String time, String source) {
         List<Flight> flights = new ArrayList<>();
 
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             flights.add(entry.getValue());
         }
         // flight add Tuesday 12:00 Beijing Dubai 120
@@ -231,7 +231,7 @@ public class FlightCommand {
         } else {
             number = 1;
         }
-        Flight flight = Utils.flights.get(id);
+        Flight flight = FlightScheduler.flights.get(id);
 
         // record the booked before new book
         int bookedBefore = flight.getBooked();
@@ -263,8 +263,8 @@ public class FlightCommand {
         }
 
         int id = Integer.parseInt(options[1]);
-        Flight flight = Utils.flights.get(id);
-        Utils.flights.remove(Integer.parseInt(options[1]));
+        Flight flight = FlightScheduler.flights.get(id);
+        FlightScheduler.flights.remove(Integer.parseInt(options[1]));
         // Removed Flight 0, Mon 08:00 Mumbai --> NewDelhi, from the flight schedule.
         System.out.println("Removed Flight " + id + ", " + Utils.getPrintTime(flight.getTime()) + " " + flight.getSource() + " --> " + flight.getDestination() + ", from the flight schedule");
     }
@@ -281,9 +281,9 @@ public class FlightCommand {
         }
 
         int id = Integer.parseInt(options[1]);
-        Flight flight = Utils.flights.get(id);
+        Flight flight = FlightScheduler.flights.get(id);
         flight.setBooked(0);
-        Utils.flights.put(id, flight);
+        FlightScheduler.flights.put(id, flight);
 
         // Reset passengers booked to 0 for Flight 0, Mon 08:00 Mumbai --> NewDelhi.
         System.out.println("Reset passengers booked to 0 for Flight " + id + ", " + Utils.getPrintTime(flight.getTime()) + " " + flight.getSource() + " --> " + flight.getDestination() + ".");
@@ -302,7 +302,7 @@ public class FlightCommand {
         }
 
         int id = Integer.parseInt(options[1]);
-        Flight flight = Utils.flights.get(id);
+        Flight flight = FlightScheduler.flights.get(id);
 
         if (flight == null) {
             throw new RuntimeException("Invalid Flight ID.");
@@ -347,11 +347,11 @@ public class FlightCommand {
                 if (Utils.pTime.matcher(line).matches()) {
                     // add flight
                     String[] split = line.split(",");
-                    Flight flight = new Flight(Utils.flights.size(), split[0], split[1], split[2], Integer.parseInt(split[3]), Integer.parseInt(split[4]));
+                    Flight flight = new Flight(FlightScheduler.flights.size(), split[0], split[1], split[2], Integer.parseInt(split[3]), Integer.parseInt(split[4]));
 
                     // check location is in the database
-                    if (Utils.locations.containsKey(split[1]) && Utils.locations.containsKey(split[2])) {
-                        Utils.flights.put(Utils.flights.size(), flight);
+                    if (FlightScheduler.locations.containsKey(split[1]) && FlightScheduler.locations.containsKey(split[2])) {
+                        FlightScheduler.flights.put(FlightScheduler.flights.size(), flight);
                         // right add 1
                         right++;
                     } else {
@@ -397,7 +397,7 @@ public class FlightCommand {
 
             int right = 0;
             // write file
-            for (Map.Entry<Integer, Flight> integerFlightEntry : Utils.flights.entrySet()) {
+            for (Map.Entry<Integer, Flight> integerFlightEntry : FlightScheduler.flights.entrySet()) {
                 Flight flight = integerFlightEntry.getValue();
                 // format style
                 String line = flight.getTime() + "," + flight.getSource() + "," + flight.getDestination() + "," + flight.getCapacity() + "," + flight.getBooked();
@@ -405,7 +405,7 @@ public class FlightCommand {
                 writer.newLine();
             }
             writer.close();
-            System.out.println("Exported " + Utils.flights.size() + " flight.");
+            System.out.println("Exported " + FlightScheduler.flights.size() + " flight.");
         } catch (IOException e) {
             // error process
             throw new RuntimeException("Error writing file.");

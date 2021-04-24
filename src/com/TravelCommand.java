@@ -10,27 +10,55 @@ import java.util.*;
 /**
  * process command about location
  * TRAVEL <from> <to> [sort] [n]
- * TRAVEL <from> <to> cost
- * TRAVEL <from> <to> stopovers
- * TRAVEL <from> <to> layover
- * TRAVEL <from> <to> flight_time
+ * TRAVEL <from> <to> duration      sortType = 0
+ * TRAVEL <from> <to> cost          sortType = 1
+ * TRAVEL <from> <to> stopovers     sortType = 2
+ * TRAVEL <from> <to> layover       sortType = 3
+ * TRAVEL <from> <to> flight_time   sortType = 4
  */
 public class TravelCommand {
 
     public static void travelCommand(String command) {
         String[] options = command.split(" ");
 
-        if (options.length < 4) {
-            throw new RuntimeException("not enough arguments");
+        int sortType = 0;
+
+        if (options.length < 3) {
+            throw new RuntimeException("" +
+                    "Usage: TRAVEL <from> <to> [cost/duration/stopovers/layover/flight_time]");
         }
 
+        // sorted
+        if (options.length == 4){
+            // sorted by arguments
+            switch (options[3].toLowerCase()) {
+                case "duration":
+                    sortType = 0;
+                case "cost":
+                    sortType = 1;
+                    break;
+                case "stopovers":
+                    sortType = 2;
+                    break;
+                case "layover":
+                    sortType = 3;
+                    break;
+                case "flight_time":
+                    sortType = 4;
+                    break;
+                default:
+                    throw new RuntimeException("Invalid sorting property: must be either cost, duration, stopovers, layover, or flight_time.");
+            }
+        }
+
+
         // source is not in database
-        if (!Utils.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1])) {
             throw new RuntimeException("Starting location not found.");
         }
 
         // destination is not in database
-        if (!Utils.locations.containsKey(options[2])) {
+        if (!FlightScheduler.locations.containsKey(options[2])) {
             throw new RuntimeException("Ending location not found.");
         }
 
@@ -43,30 +71,40 @@ public class TravelCommand {
 
         // format ways
         List<TravelDefinition> ways = new ArrayList<>();
+
         for (List<Flight> flights : path) {
             TravelDefinition travelDefinition = new TravelDefinition(flights);
             ways.add(travelDefinition);
         }
 
         // sorted by arguments
-        switch (options[3].toLowerCase()) {
-            case "cost":
+        switch (sortType) {
+            case 0:
+                ways.sort(Comparator.comparingInt(TravelDefinition::getDuration));
+            case 1:
                 ways.sort((o1, o2) -> (int) (o1.getCost() - o2.getCost()));
                 break;
-            case "stopovers":
+            case 2:
                 ways.sort(Comparator.comparingInt(TravelDefinition::getStopovers));
                 break;
-            case "layover":
+            case 3:
                 ways.sort(Comparator.comparingInt(TravelDefinition::getLayoverTime));
                 break;
-            case "flight_time":
+            case 4:
                 ways.sort(Comparator.comparingInt(TravelDefinition::getFlightTime));
                 break;
             default:
                 throw new RuntimeException("Invalid sorting property: must be either cost, duration, stopovers, layover, or flight_time.");
         }
 
-        printResult(ways);
+        // find n
+        if (options.length == 5){
+            printResult(ways, Integer.parseInt(options[4]));
+        }
+        else {
+            printResult(ways, 1);
+        }
+
 
     }
 
@@ -82,7 +120,7 @@ public class TravelCommand {
         Set<Integer> visited = new HashSet<>();
 
         // find source -> destination
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             if (entry.getValue().getSource().equals(source) && entry.getValue().getDestination().equals(destination)){
                 List<Flight> path = new ArrayList<>();
                 path.add(entry.getValue());
@@ -96,10 +134,10 @@ public class TravelCommand {
          */
 
         // get all x
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
 
             if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equals(source)){
-                for (Map.Entry<Integer, Flight> entry1 : Utils.flights.entrySet()) {
+                for (Map.Entry<Integer, Flight> entry1 : FlightScheduler.flights.entrySet()) {
                     // the location is right
                     if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equals(entry.getValue().getDestination()) && entry1.getValue().getDestination().equals(destination)){
                         // check time
@@ -118,18 +156,18 @@ public class TravelCommand {
         /*
             find source -> x -> y -> destination
          */
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
 
             // beijing tu shanghai
             if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equals(source)){
 
-                for (Map.Entry<Integer, Flight> entry1 : Utils.flights.entrySet()) {
+                for (Map.Entry<Integer, Flight> entry1 : FlightScheduler.flights.entrySet()) {
                     // the location is right
                     if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equals(entry.getValue().getDestination())){
                         // check time
                         if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getTime()) < 0) {
 
-                            for (Map.Entry<Integer, Flight> entry2 : Utils.flights.entrySet()) {
+                            for (Map.Entry<Integer, Flight> entry2 : FlightScheduler.flights.entrySet()) {
                                 if (!visited.contains(entry2.getKey()) && entry2.getValue().getSource().equals(entry1.getValue().getDestination()) && entry2.getValue().getDestination().equals(destination)){
                                     if (Utils.getTimeDifferenceByTimeString(entry1.getValue().getArrivedTime(), entry2.getValue().getTime()) < 0){
                                         List<Flight> path = new ArrayList<>();
@@ -171,7 +209,7 @@ public class TravelCommand {
         // add visited flight
         visited.add(flight);
 
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             if (entry.getValue().getSource().equals(flight.getSource())){
                 if (entry.getValue().getDestination().equals(flight.getDestination())){
                     path.add(entry.getValue());
@@ -198,7 +236,7 @@ public class TravelCommand {
     public Map<String, Integer> getInitGraph() {
         Map<String, Integer> graph = new HashMap<>();
 
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             String source = entry.getValue().getSource();
             String destination = entry.getValue().getDestination();
             Integer id = entry.getKey();
@@ -213,16 +251,22 @@ public class TravelCommand {
      * print the result
      * @param ways way list
      */
-    public static void printResult(List<TravelDefinition> ways) {
-        for (TravelDefinition way : ways) {
-            System.out.printf("%-18s%d\n", "Legs:", way.getFlights().size());
-            System.out.printf("%-18s%dh %dm\n", "Total Duration:", way.getDuration() / 60, way.getDuration() % 60);
-            System.out.printf("%-18s$%s\n", "Total Cost:", Utils.doubleFormat.format(way.getCost()));
+    public static void printResult(List<TravelDefinition> ways, int n) {
+
+        int low = 0;
+        if (n > ways.size()){
+            low = ways.size() - 1;
+        }
+
+        for (int i = low; i < n; i++) {
+            System.out.printf("%-18s%d\n", "Legs:", ways.get(i).getFlights().size());
+            System.out.printf("%-18s%dh %dm\n", "Total Duration:", ways.get(i).getDuration() / 60, ways.get(i).getDuration() % 60);
+            System.out.printf("%-18s$%s\n", "Total Cost:", Utils.doubleFormat.format(ways.get(i).getCost()));
             System.out.println("" +
                     "-------------------------------------------------------------\n" +
                     "ID   Cost      Departure   Arrival     Source --> Destination\n" +
                     "-------------------------------------------------------------");
-            List<Flight> flights = way.getFlights();
+            List<Flight> flights = ways.get(i).getFlights();
 
             printFlight(flights.get(0));
 

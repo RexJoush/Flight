@@ -74,12 +74,12 @@ public class LocationCommand {
 
         List<String> locations = new ArrayList<>();
 
-        for (Map.Entry<String, Location> entry : Utils.locations.entrySet()) {
+        for (Map.Entry<String, Location> entry : FlightScheduler.locations.entrySet()) {
             locations.add(entry.getKey());
         }
         Collections.sort(locations);
 
-        System.out.println("Locations ("+ Utils.locations.size() +"):");
+        System.out.println("Locations ("+ FlightScheduler.locations.size() +"):");
         System.out.println(String.join(", ", locations));
     }
 
@@ -96,7 +96,7 @@ public class LocationCommand {
 
         // check location have or not
         String name = options[2];
-        if (Utils.locations.containsKey(name)) {
+        if (FlightScheduler.locations.containsKey(name)) {
             throw new RuntimeException("This location already exists.");
         }
 
@@ -135,7 +135,7 @@ public class LocationCommand {
 
         // new location add to database
         Location location = new Location(name, latitude, longitude, demand);
-        Utils.locations.put(name, location);
+        FlightScheduler.locations.put(name, location);
         System.out.println("Successfully added location " + name);
 
     }
@@ -145,10 +145,10 @@ public class LocationCommand {
      * @param option command options
      */
     public void getLocationByName(String option) {
-        if (!Utils.locations.containsKey(option)) {
+        if (!FlightScheduler.locations.containsKey(option)) {
             throw new RuntimeException("This location does not exist in the system.");
         }
-        Location location = Utils.locations.get(option);
+        Location location = FlightScheduler.locations.get(option);
         System.out.printf("%-14s%s\n","Location: ", location.getName());
         System.out.printf("%-14s%s\n","Latitude: ", location.getLatitude());
         System.out.printf("%-14s%s\n","Longitude: ", location.getLongitude());
@@ -186,8 +186,8 @@ public class LocationCommand {
                     Location location = new Location(split[0], Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]));
 
                     // check location is in the database
-                    if (!Utils.locations.containsKey(split[0])) {
-                        Utils.locations.put(split[0], location);
+                    if (!FlightScheduler.locations.containsKey(split[0])) {
+                        FlightScheduler.locations.put(split[0], location);
                         right++;
                     } else {
                         error++;
@@ -230,7 +230,7 @@ public class LocationCommand {
 
             int right = 0;
             // write file
-            for (Map.Entry<String, Location> entry : Utils.locations.entrySet()) {
+            for (Map.Entry<String, Location> entry : FlightScheduler.locations.entrySet()) {
                 Location location = entry.getValue();
                 // format style
                 String line = location.getName() + "," + location.getLatitude() + "," + location.getLatitude() + "," + location.getDemand();
@@ -238,7 +238,7 @@ public class LocationCommand {
                 writer.newLine();
             }
             writer.close();
-            System.out.println("Exported " + Utils.locations.size() + " locations.");
+            System.out.println("Exported " + FlightScheduler.locations.size() + " locations.");
         } catch (IOException e) {
             // error process
             throw new RuntimeException("Error writing file.");
@@ -254,7 +254,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!Utils.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1])) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
@@ -288,7 +288,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!Utils.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1])) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
@@ -298,12 +298,17 @@ public class LocationCommand {
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
 
+        int count = 0;
         for (Flight flight : flights) {
             // find All source from this place
             if (flight.getSource().equals(options[1])) {
                 System.out.printf("%4s %-12sDeparture to %s\n", flight.getId(),
                         Utils.getPrintTime(flight.getTime()),flight.getDestination());
+                count++;
             }
+        }
+        if (count == 0){
+            System.out.println("(None)");
         }
     }
 
@@ -316,7 +321,7 @@ public class LocationCommand {
         if (options.length < 2) {
             throw new RuntimeException("not enough arguments");
         }
-        if (!Utils.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1])) {
             throw new RuntimeException("This location does not exist in the system.");
         }
 
@@ -326,12 +331,18 @@ public class LocationCommand {
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
 
+        int count = 0;
+
         for (Flight flight : flights) {
             // find All source from this place
             if (flight.getDestination().equals(options[1])) {
                 System.out.printf("%4s %-12sArrival from %s\n", flight.getId(),
                         Utils.getPrintTime(flight.getTime()),flight.getSource());
+                count++;
             }
+        }
+        if (count == 0){
+            System.out.println("(None)");
         }
     }
 
@@ -342,7 +353,7 @@ public class LocationCommand {
      */
     public List<Flight> getSortedFlight() {
         List<Flight> flights = new ArrayList<>();
-        for (Map.Entry<Integer, Flight> entry : Utils.flights.entrySet()) {
+        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
             flights.add(entry.getValue());
         }
 

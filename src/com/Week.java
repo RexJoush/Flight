@@ -2,12 +2,19 @@ package com;
 
 public enum Week {
     Monday("Monday", 1),
+    monday("monday", 1),
     Tuesday("Tuesday", 2),
+    tuesday("tuesday", 2),
     Wednesday("Wednesday", 3),
+    wednesday("wednesday", 3),
     Thursday("Thursday", 4),
+    thursday("thursday", 4),
     Friday("Friday", 5),
+    friday("friday", 5),
     Saturday("Saturday", 6),
-    Sunday("Sunday", 0);
+    saturday("saturday", 6),
+    Sunday("Sunday", 0),
+    sunday("sunday", 0);
 
     private String name;
     private int index;

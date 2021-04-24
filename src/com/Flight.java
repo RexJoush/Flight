@@ -46,10 +46,10 @@ public class Flight {
         double d = getDistance();
 
         // get demand of destination
-        double DTo = Utils.locations.get(this.getDestination()).getDemand();
+        double DTo = FlightScheduler.locations.get(this.getDestination()).getDemand();
 
         // get demand of source
-        double DFrom = Utils.locations.get(this.getSource()).getDemand();
+        double DFrom = FlightScheduler.locations.get(this.getSource()).getDemand();
 
         // calculate the ticket price
         return y * d / 100 * (30 + 4 * (DTo - DFrom));
@@ -79,10 +79,10 @@ public class Flight {
     //get the distance of this flight in km
     public double getDistance() {
         // get source location object
-        Location sourceLocation = Utils.locations.get(this.source);
+        Location sourceLocation = FlightScheduler.locations.get(this.source);
 
         // get destination location object
-        Location destinationLocation = Utils.locations.get(this.destination);
+        Location destinationLocation = FlightScheduler.locations.get(this.destination);
 
         // calculate the distance of two location
         return Location.distance(sourceLocation, destinationLocation);
