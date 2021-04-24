@@ -30,6 +30,10 @@ public class FlightCommand {
             return;
         }
         String[] options = command.split(" ");
+        if (options.length < 2){
+            throw new RuntimeException("Usage: FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+                    "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
+        }
         boolean flag = true;
         switch (options[1].toLowerCase()) {
             // add flight
@@ -136,18 +140,18 @@ public class FlightCommand {
 
         // check source location
         String source = options[4];
-        if (!FlightScheduler.locations.containsKey(source)) {
+        if (!FlightScheduler.locations.containsKey(Utils.captureName(source.toLowerCase()))) {
             throw new RuntimeException("Invalid starting location.");
         }
 
         // check destination location
         String destination = options[5];
-        if (!FlightScheduler.locations.containsKey(destination)) {
+        if (!FlightScheduler.locations.containsKey(Utils.captureName(destination.toLowerCase()))) {
             throw new RuntimeException("Invalid ending location.");
         }
 
         // source and destination not allowed to be the same
-        if (source.equals(destination)) {
+        if (source.equalsIgnoreCase(destination)) {
             throw new RuntimeException("Source and destination cannot be the same place.");
         }
 
@@ -195,11 +199,11 @@ public class FlightCommand {
         for (Flight flight : flights) {
             // if source is same and time difference less than 60, false
             if (Math.abs(Utils.getTimeDifferenceByTimeString(flight.getTime(), time)) <= 60 && source.equals(flight.getSource())) {
-                throw new RuntimeException("Scheduling conflict! This flight clashes with Flight " + flight.getId() + " departing from " + flight.getSource() + " on " + flight.getArrivedTime() + ".");
+                throw new RuntimeException("Scheduling conflict! This flight clashes with Flight " + flight.getId() + " departing from " + flight.getSource() + " on " + Utils.captureName(flight.getArrivedTime()) + ".");
             }
             // if arrived time is same and time difference less than 60, false
             if (Math.abs(Utils.getTimeDifferenceByTimeString(flight.getArrivedTime(), time)) <= 60 && source.equals(flight.getDestination())) {
-                throw new RuntimeException("Scheduling conflict! This flight clashes with Flight " + flight.getId() + " arriving at " + flight.getDestination() + " on " + flight.getArrivedTime() + ".");
+                throw new RuntimeException("Scheduling conflict! This flight clashes with Flight " + flight.getId() + " arriving at " + flight.getDestination() + " on " + Utils.captureName(flight.getArrivedTime()) + ".");
             }
         }
     }

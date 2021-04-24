@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 public class Utils {
 
 
-
     public static DecimalFormat TimeFormat = new DecimalFormat("00");
     public static DecimalFormat doubleFormat = new DecimalFormat("#.00");
 
@@ -46,7 +45,7 @@ public class Utils {
         double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
                 Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(b / 2), 2)));
         // radians * earth radius, return kilometer
-        s =  s * EARTH_RADIUS;
+        s = s * EARTH_RADIUS;
         return s;
     }
 
@@ -123,12 +122,25 @@ public class Utils {
     /**
      * get print format time
      * example
-     *  time: Tuesday 20:20
-     *  return Tue 20:20
+     * time: Tuesday 20:20
+     * return Tue 20:20
+     *
      * @param time resource time string
      * @return format time string
      */
     public static String getPrintTime(String time) {
         return time.split(" ")[0].substring(0, 3) + " " + time.split(" ")[1];
+    }
+
+    /**
+     * make the string first letter to upper case
+     *
+     * @param str wait for change string
+     * @return change result
+     */
+    public static String captureName(String str) {
+        char[] cs = str.toCharArray();
+        cs[0] -= 32;
+        return String.valueOf(cs);
     }
 }
