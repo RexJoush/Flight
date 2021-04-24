@@ -25,15 +25,15 @@ public class Utils {
     public static DecimalFormat doubleFormat = new DecimalFormat("#.00");
 
     // Check the file every line whether the format meets the requirements
-    public static Pattern pTime = Pattern.compile("(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) [0-2][0-9]:[0-5][0-9],[A-Za-z]+,[A-Za-z]+,[0-9]+,[0-9]+");
+    public static Pattern pTime = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturda|Sunday|sunday|) [0-2][0-9]:[0-5][0-9],[A-Za-z]+,[A-Za-z]+,[0-9]+,[0-9]+");
 
     // Check the file every line whether the format meets the requirements
     public static Pattern pLocation = Pattern.compile("[A-Za-z]+,[-]?\\d+.\\d+,[-]?\\d+.\\d+,[-]?[01](.\\d+)?");
 
     // Check the time whether the format meets the requirements
-    public static Pattern p = Pattern.compile("(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) [0-2][0-9]:[0-5][0-9]");
+    public static Pattern p = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturda|Sunday|sunday|) [0-2][0-9]:[0-5][0-9]");
 
-    private static final double EARTH_RADIUS = 6378.137;
+    private static final double EARTH_RADIUS = 6371.0;
 
     public static double getDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
         // latitude

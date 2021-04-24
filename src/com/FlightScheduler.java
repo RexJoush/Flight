@@ -28,7 +28,10 @@ public class FlightScheduler {
         // they will maintain the same values between testcases.
 
         // START YOUR CODE HERE
-        while (true) {
+
+        boolean exit = false;
+
+        while (!exit) {
 
             // get command
             System.out.print("User: ");
@@ -56,7 +59,7 @@ public class FlightScheduler {
                         break;
                     case "exit":
                         System.out.println("Application closed.");
-                        System.exit(0);
+                        exit = true;
                         break;
                     case "help":
                         System.out.println(

@@ -304,6 +304,10 @@ public class FlightCommand {
         int id = Integer.parseInt(options[1]);
         Flight flight = Utils.flights.get(id);
 
+        if (flight == null) {
+            throw new RuntimeException("Invalid Flight ID.");
+        }
+
         System.out.println("Flight " + id);
         System.out.printf("%-14s%s %s\n", "Departure: ", Utils.getPrintTime(flight.getTime()), flight.getSource());
         System.out.printf("%-14s%s %s\n", "Arrival: ", Utils.getPrintTime(flight.getArrivedTime()), flight.getDestination());
