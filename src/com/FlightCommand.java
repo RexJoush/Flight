@@ -83,13 +83,14 @@ public class FlightCommand {
      */
     public void getAllFlights() {
 
-        System.out.println("-------------------------------------------------------");
-        System.out.println("ID   Departure   Arrival     Source --> Destination");
-        System.out.println("-------------------------------------------------------");
         if (FlightScheduler.flights.size() == 0){
             System.out.println("(None)");
             return;
         }
+
+        System.out.println("-------------------------------------------------------");
+        System.out.println("ID   Departure   Arrival     Source --> Destination");
+        System.out.println("-------------------------------------------------------");
 
         List<Flight> flights = new ArrayList<>();
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {

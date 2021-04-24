@@ -72,6 +72,11 @@ public class LocationCommand {
      */
     public void getAllLocations() {
 
+        if (FlightScheduler.locations.size() == 0){
+            System.out.println("(None)");
+            return;
+        }
+
         List<String> locations = new ArrayList<>();
 
         for (Map.Entry<String, Location> entry : FlightScheduler.locations.entrySet()) {
@@ -136,7 +141,7 @@ public class LocationCommand {
         // new location add to database
         Location location = new Location(name, latitude, longitude, demand);
         FlightScheduler.locations.put(name, location);
-        System.out.println("Successfully added location " + name);
+        System.out.println("Successfully added location " + name + ".");
 
     }
 
@@ -260,6 +265,7 @@ public class LocationCommand {
 
         List<Flight> flights = getSortedFlight();
 
+        System.out.println("Perth");
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
@@ -294,6 +300,7 @@ public class LocationCommand {
 
         List<Flight> flights = getSortedFlight();
 
+        System.out.println("Perth");
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
@@ -327,6 +334,7 @@ public class LocationCommand {
 
         List<Flight> flights = getSortedFlight();
 
+        System.out.println("Perth");
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
