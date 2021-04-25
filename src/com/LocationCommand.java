@@ -50,7 +50,7 @@ public class LocationCommand {
                         break;
                     // import csv file
                     case "import":
-                        importLocation(options);
+                        importLocations(options);
                         break;
                     // export csv file
                     case "export":
@@ -159,6 +159,63 @@ public class LocationCommand {
         System.out.printf("%-14s%s\n", "Latitude: ", location.getLatitude());
         System.out.printf("%-14s%s\n", "Longitude: ", location.getLongitude());
         System.out.printf("%-14s%s\n", "Demand: ", location.getDemand());
+    }
+
+    /**
+     * Add a location to the database
+     * do not print out anything in this function
+     * return negative numbers for error cases
+     *
+     * @param name   location name
+     * @param lat    latitude
+     * @param lon    longitude
+     * @param demand demand
+     * @return add result
+     */
+    public int addLocation(String name, String lat, String lon, String demand) {
+        Location location = new Location();
+        try {
+            location.setName(name);
+            location.setLongitude(Double.parseDouble(lat));
+            location.setLatitude(Double.parseDouble(lon));
+            location.setDemand(Double.parseDouble(demand));
+            FlightScheduler.locations.put(name.toLowerCase(), location);
+        } catch (Exception e){
+            return  -1;
+        }
+        return 1;
+    }
+
+    public void importLocations(String[] command) {
+        try {
+            if (command.length < 3) throw new FileNotFoundException();
+            BufferedReader br = new BufferedReader(new FileReader(new File(command[2])));
+            String line;
+            int count = 0;
+            int err = 0;
+
+            while ((line = br.readLine()) != null) {
+                String[] lparts = line.split(",");
+                if (lparts.length < 4) continue;
+
+                int status = addLocation(lparts[0], lparts[1], lparts[2], lparts[3]);
+                if (status < 0) {
+                    err++;
+                    continue;
+                }
+                count++;
+            }
+            br.close();
+            System.out.println("Imported " + count + " location" + (count != 1 ? "s" : "") + ".");
+            if (err > 0) {
+                if (err == 1) System.out.println("1 line was invalid.");
+                else System.out.println(err + " lines were invalid.");
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error reading file.");
+            return;
+        }
     }
 
     /**

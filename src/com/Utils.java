@@ -139,8 +139,6 @@ public class Utils {
      * @return change result
      */
     public static String captureName(String str) {
-        char[] cs = str.toCharArray();
-        cs[0] -= 32;
-        return String.valueOf(cs);
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

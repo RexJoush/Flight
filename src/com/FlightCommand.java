@@ -94,7 +94,7 @@ public class FlightCommand {
         System.out.println("ID   Departure   Arrival     Source --> Destination");
         System.out.println("-------------------------------------------------------");
 
-        if (FlightScheduler.flights.size() == 0){
+        if (FlightScheduler.flights.size() == 0) {
             System.out.println("(None)");
             System.out.println();
             return;
@@ -122,10 +122,10 @@ public class FlightCommand {
         });
 
         for (Flight flight : flights) {
-            System.out.printf("%4s %-9s   %-9s   %s --> %s", flight.getId(),
+            System.out.printf("%4s %-9s   %-9s   %s --> %s\n", flight.getId(),
                     Utils.getPrintTime(Utils.captureName(flight.getTime())),
                     Utils.getPrintTime(Utils.captureName(flight.getArrivedTime())),
-                    Utils.captureName(flight.getSource()), Utils.captureName(flight.getDestination()));
+                    Utils.captureName(flight.getSource()), flight.getDestination());
         }
 
     }
@@ -367,10 +367,10 @@ public class FlightCommand {
                 count++;
             }
             br.close();
-            System.out.println("Imported "+count+" flight"+(count!=1?"s":"")+".");
+            System.out.println("Imported " + count + " flight" + (count != 1 ? "s" : "") + ".");
             if (err > 0) {
                 if (err == 1) System.out.println("1 line was invalid.");
-                else System.out.println(err+" lines were invalid.");
+                else System.out.println(err + " lines were invalid.");
             }
         } catch (IOException e) {
             System.out.println("Error reading file.");
@@ -383,30 +383,29 @@ public class FlightCommand {
      * handle error cases and return status negative if error
      * (different status codes for different messages)
      * do not print out anything in this function
-     * @param date1 week
-     * @param date2 time
-     * @param start resource location
-     * @param end   destination location
+     *
+     * @param date1    week
+     * @param date2    time
+     * @param start    resource location
+     * @param end      destination location
      * @param capacity pass
-     * @param booked check
+     * @param booked   check
      * @return add status
      */
     public int addFlight(String date1, String date2, String start, String end, String capacity, int booked) {
         Flight flight = new Flight();
         int id = FlightScheduler.flights.size();
-        flight.setId(id);
-        flight.setTime(date1 + " " + date2);
-        flight.setSource(start);
-        flight.setDestination(end);
         try {
+            flight.setId(id);
+            flight.setTime(date1 + " " + date2);
+            flight.setSource(start);
+            flight.setDestination(end);
             flight.setCapacity(Integer.parseInt(capacity));
-        } catch (NumberFormatException e) {
+            flight.setBooked(booked);
+            FlightScheduler.flights.put(id, flight);
+        } catch (Exception e) {
             return -1;
         }
-        flight.setBooked(booked);
-
-        FlightScheduler.flights.put(id, flight);
-
         return 1;
     }
 
@@ -456,10 +455,10 @@ public class FlightCommand {
                 }
             }
 
-            if (right == 1){
+            if (right == 1) {
                 System.out.println("Imported " + right + " flight.");
             }
-            if (right != 1){
+            if (right != 1) {
                 System.out.println("Imported " + right + " flights.");
             }
             if (error == 1) {
@@ -505,9 +504,9 @@ public class FlightCommand {
                 writer.newLine();
             }
             writer.close();
-            if (FlightScheduler.flights.size() == 1){
+            if (FlightScheduler.flights.size() == 1) {
                 System.out.println("Exported " + FlightScheduler.flights.size() + " flight.");
-            } else  {
+            } else {
                 System.out.println("Exported " + FlightScheduler.flights.size() + " flights.");
             }
 
