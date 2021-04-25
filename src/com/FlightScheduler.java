@@ -67,7 +67,7 @@ public class FlightScheduler {
                         TravelCommand.travelCommand(s);
                         break;
                     case "exit":
-                        System.out.println("Application closed.");
+                        // System.out.println("Application closed.");
                         exit = true;
                         break;
                     case "help":

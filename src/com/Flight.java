@@ -17,7 +17,7 @@ public class Flight {
     //get the number of minutes this flight takes (round to nearest whole number)
     public int getDuration() {
         // return the time
-        return (int) (getDistance() / 720 * 60);
+        return (int) Math.round((getDistance() / 720 * 60));
     }
 
     // get the flight arrived time
@@ -46,10 +46,10 @@ public class Flight {
         double d = getDistance();
 
         // get demand of destination
-        double DTo = FlightScheduler.locations.get(this.getDestination()).getDemand();
+        double DTo = FlightScheduler.locations.get(this.getDestination().toLowerCase()).getDemand();
 
         // get demand of source
-        double DFrom = FlightScheduler.locations.get(this.getSource()).getDemand();
+        double DFrom = FlightScheduler.locations.get(this.getSource().toLowerCase()).getDemand();
 
         // calculate the ticket price
         return y * d / 100 * (30 + 4 * (DTo - DFrom));
@@ -79,10 +79,10 @@ public class Flight {
     //get the distance of this flight in km
     public double getDistance() {
         // get source location object
-        Location sourceLocation = FlightScheduler.locations.get(this.source);
+        Location sourceLocation = FlightScheduler.locations.get(this.source.toLowerCase());
 
         // get destination location object
-        Location destinationLocation = FlightScheduler.locations.get(this.destination);
+        Location destinationLocation = FlightScheduler.locations.get(this.destination.toLowerCase());
 
         // calculate the distance of two location
         return Location.distance(sourceLocation, destinationLocation);

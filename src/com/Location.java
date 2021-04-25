@@ -16,7 +16,7 @@ public class Location {
 
     //Implement the Haversine formula - return value in kilometres
     public static double distance(Location l1, Location l2) {
-		return Utils.getDistance(l1.longitude, l1.latitude, l2.longitude, l2.latitude);
+		return Utils.getDistance(l1.getLongitude(), l1.getLatitude(), l2.getLongitude(), l2.getLatitude());
 	}
 
     public void addArrival(Flight f) {

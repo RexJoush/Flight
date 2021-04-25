@@ -10,37 +10,34 @@ import java.util.*;
 
 /**
  * process command about location
- *      LOCATIONS
- *      LOCATION ADD <name> <lat> <long> <demand_coefficient>
- *      LOCATION <name>
- *      LOCATION IMPORT/EXPORT <filename>
- *      SCHEDULE <location_name>
- *      DEPARTURES <location_name>
- *      ARRIVALS <location_name>
+ * LOCATIONS
+ * LOCATION ADD <name> <lat> <long> <demand_coefficient>
+ * LOCATION <name>
+ * LOCATION IMPORT/EXPORT <filename>
+ * SCHEDULE <location_name>
+ * DEPARTURES <location_name>
+ * ARRIVALS <location_name>
  */
 public class LocationCommand {
 
 
-    public void locationCommand(String command){
+    public void locationCommand(String command) {
 
         // list all available locations in alphabetical order
-        if ("locations".equalsIgnoreCase(command)){
+        if ("locations".equalsIgnoreCase(command)) {
             getAllLocations();
             return;
         }
         String[] options = command.split(" ");
-        if ("schedule".equalsIgnoreCase(options[0])){
+        if ("schedule".equalsIgnoreCase(options[0])) {
             schedule(options);
-        }
-        else if ("departures".equalsIgnoreCase(options[0])){
+        } else if ("departures".equalsIgnoreCase(options[0])) {
             departures(options);
-        }
-        else if ("arrivals".equalsIgnoreCase(options[0])) {
+        } else if ("arrivals".equalsIgnoreCase(options[0])) {
             arrivals(options);
-        }
-        else {
-            if (options.length < 3){
-                if ("location".equals(options[1])){
+        } else {
+            if (options.length < 3) {
+                if ("location".equals(options[1])) {
                     getLocationByName(options[1]);
                 } else {
                     throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
@@ -48,15 +45,15 @@ public class LocationCommand {
             } else {
                 switch (options[1].toLowerCase()) {
                     // add location
-                    case "add" :
+                    case "add":
                         addLocation(options);
                         break;
                     // import csv file
-                    case "import" :
+                    case "import":
                         importLocation(options);
                         break;
                     // export csv file
-                    case "export" :
+                    case "export":
                         exportLocation(options);
                         break;
                     default:
@@ -72,7 +69,7 @@ public class LocationCommand {
      */
     public void getAllLocations() {
 
-        if (FlightScheduler.locations.size() == 0){
+        if (FlightScheduler.locations.size() == 0) {
             System.out.println("Locations (0):");
             System.out.println("(None)");
             return;
@@ -85,18 +82,19 @@ public class LocationCommand {
         }
         Collections.sort(locations);
 
-        System.out.println("Locations ("+ FlightScheduler.locations.size() +"):");
+        System.out.println("Locations (" + FlightScheduler.locations.size() + "):");
         System.out.println(String.join(", ", locations));
     }
 
     /**
      * add location
+     *
      * @param options command options
      */
     public void addLocation(String[] options) {
         // check parameter number
         if (options.length != 6) {
-            throw new RuntimeException("Usage: \n"+
+            throw new RuntimeException("Usage: \n" +
                     "LOCATION ADD <name> <lat> <long> <demand_coefficient>\n" +
                     "Example: LOCATION ADD Sydney -33.847927 150.651786 0.2");
         }
@@ -111,10 +109,10 @@ public class LocationCommand {
         double latitude = 0.0;
         try {
             latitude = Double.parseDouble(options[3]);
-            if (Math.abs(latitude) > 85.0){
+            if (Math.abs(latitude) > 85.0) {
                 throw new RuntimeException("Invalid latitude. It must be a number of degrees between -85 and +85.");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Invalid latitude. It must be a number of degrees between -85 and +85.");
         }
 
@@ -122,10 +120,10 @@ public class LocationCommand {
         double longitude = 0.0;
         try {
             longitude = Double.parseDouble(options[4]);
-            if (Math.abs(longitude) > 180.0){
+            if (Math.abs(longitude) > 180.0) {
                 throw new RuntimeException("Invalid longitude. It must be a number of degrees between -180 and +180.");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Invalid longitude. It must be a number of degrees between -180 and +180.");
         }
 
@@ -133,10 +131,10 @@ public class LocationCommand {
         double demand = 0.0;
         try {
             demand = Double.parseDouble(options[5]);
-            if (Math.abs(demand) > 1.0){
+            if (Math.abs(demand) > 1.0) {
                 throw new RuntimeException("Invalid demand coefficient. It must be a number between -1 and +1.");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Invalid demand coefficient. It must be a number between -1 and +1.");
         }
 
@@ -149,6 +147,7 @@ public class LocationCommand {
 
     /**
      * view details about a location (it’s name, coordinates, demand coefficient)
+     *
      * @param option command options
      */
     public void getLocationByName(String option) {
@@ -156,10 +155,10 @@ public class LocationCommand {
             throw new RuntimeException("This location does not exist in the system.");
         }
         Location location = FlightScheduler.locations.get(option);
-        System.out.printf("%-14s%s\n","Location: ", location.getName());
-        System.out.printf("%-14s%s\n","Latitude: ", location.getLatitude());
-        System.out.printf("%-14s%s\n","Longitude: ", location.getLongitude());
-        System.out.printf("%-14s%s\n","Demand: ", location.getDemand());
+        System.out.printf("%-14s%s\n", "Location: ", location.getName());
+        System.out.printf("%-14s%s\n", "Latitude: ", location.getLatitude());
+        System.out.printf("%-14s%s\n", "Longitude: ", location.getLongitude());
+        System.out.printf("%-14s%s\n", "Demand: ", location.getDemand());
     }
 
     /**
@@ -206,7 +205,11 @@ public class LocationCommand {
                 }
             }
 
-            System.out.println("Imported " + right + " locations.");
+            if (right == 1) {
+                System.out.println("Imported " + right + " location.");
+            } else {
+                System.out.println("Imported " + right + " locations.");
+            }
             if (error == 1) {
                 System.out.println(error + " line was invalid.");
             }
@@ -243,12 +246,16 @@ public class LocationCommand {
             for (Map.Entry<String, Location> entry : FlightScheduler.locations.entrySet()) {
                 Location location = entry.getValue();
                 // format style
-                String line = location.getName() + "," + location.getLatitude() + "," + location.getLatitude() + "," + location.getDemand();
+                String line = Utils.captureName(location.getName()) + "," + location.getLatitude() + "," + location.getLatitude() + "," + location.getDemand();
                 writer.write(line);
                 writer.newLine();
             }
             writer.close();
-            System.out.println("Exported " + FlightScheduler.locations.size() + " locations.");
+            if (FlightScheduler.locations.size() == 1) {
+                System.out.println("Exported " + FlightScheduler.locations.size() + " location.");
+            } else {
+                System.out.println("Exported " + FlightScheduler.locations.size() + " locations.");
+            }
         } catch (IOException e) {
             // error process
             throw new RuntimeException("Error writing file.");
@@ -279,12 +286,12 @@ public class LocationCommand {
             // find All source from this place
             if (flight.getSource().equals(options[1])) {
                 System.out.printf("%4s %-12sDeparture to %s\n", flight.getId(),
-                        Utils.getPrintTime(flight.getTime()),flight.getDestination());
+                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getDestination());
             }
             // find All source from this place
             if (flight.getDestination().equals(options[1])) {
                 System.out.printf("%4s %-12sArrival from %s\n", flight.getId(),
-                        Utils.getPrintTime(flight.getTime()),flight.getSource());
+                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
             }
         }
     }
@@ -315,11 +322,11 @@ public class LocationCommand {
             // find All source from this place
             if (flight.getSource().equals(options[1])) {
                 System.out.printf("%4s %-12sDeparture to %s\n", flight.getId(),
-                        Utils.getPrintTime(flight.getTime()),flight.getDestination());
+                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getDestination());
                 count++;
             }
         }
-        if (count == 0){
+        if (count == 0) {
             System.out.println("(None)");
         }
     }
@@ -350,11 +357,11 @@ public class LocationCommand {
             // find All source from this place
             if (flight.getDestination().equals(options[1])) {
                 System.out.printf("%4s %-12sArrival from %s\n", flight.getId(),
-                        Utils.getPrintTime(flight.getTime()),flight.getSource());
+                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
                 count++;
             }
         }
-        if (count == 0){
+        if (count == 0) {
             System.out.println("(None)");
         }
     }

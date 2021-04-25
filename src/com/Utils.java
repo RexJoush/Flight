@@ -20,13 +20,13 @@ public class Utils {
     public static DecimalFormat doubleFormat = new DecimalFormat("#.00");
 
     // Check the file every line whether the format meets the requirements
-    public static Pattern pTime = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturda|Sunday|sunday|) [0-2][0-9]:[0-5][0-9],[A-Za-z]+,[A-Za-z]+,[0-9]+,[0-9]+");
+    public static Pattern pTime = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturday|Sunday|sunday|) \\d+:\\d+,[A-Za-z]+,[A-Za-z]+,\\d+,\\d+");
 
     // Check the file every line whether the format meets the requirements
     public static Pattern pLocation = Pattern.compile("[A-Za-z]+,[-]?\\d+.\\d+,[-]?\\d+.\\d+,[-]?[01](.\\d+)?");
 
     // Check the time whether the format meets the requirements
-    public static Pattern p = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturda|Sunday|sunday|) [0-2][0-9]:[0-5][0-9]");
+    public static Pattern p = Pattern.compile("(Monday|monday|Tuesday|tuesday|Wednesday|wednesday|Thursday|thursday|Friday|friday|Saturday|saturday|Sunday|sunday|) \\d+:\\d+");
 
     private static final double EARTH_RADIUS = 6371.0;
 

@@ -13,41 +13,43 @@ import java.util.Map;
 
 /**
  * process command about flight
- *      FLIGHTS
- *      FLIGHT ADD <departure time> <from> <to> <capacity>
- *      FLIGHT IMPORT/EXPORT <filename>
- *      FLIGHT <id>
- *      FLIGHT <id> BOOK <num>
- *      FLIGHT <id> REMOVE
- *      FLIGHT <id> RESET
+ * FLIGHTS
+ * FLIGHT ADD <departure time> <from> <to> <capacity>
+ * FLIGHT IMPORT/EXPORT <filename>
+ * FLIGHT <id>
+ * FLIGHT <id> BOOK <num>
+ * FLIGHT <id> REMOVE
+ * FLIGHT <id> RESET
  */
 public class FlightCommand {
 
-    public void flightCommand(String command){
+    public void flightCommand(String command) {
         // list all available flights ordered by departure time, then departure location name
-        if ("flights".equals(command)){
+        if ("flights".equals(command)) {
             getAllFlights();
             return;
         }
         String[] options = command.split(" ");
-        if (options.length < 2){
-            throw new RuntimeException("Usage: FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
-                    "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
+        if (options.length < 2) {
+            throw new RuntimeException("Usage:\n" +
+                    "FLIGHT <id> [BOOK/REMOVE/RESET] [num]\n" +
+                    "FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+                    "FLIGHT IMPORT/EXPORT <filename>");
         }
         boolean flag = true;
         switch (options[1].toLowerCase()) {
             // add flight
-            case "add" :
+            case "add":
                 flag = false;
                 addFlight(options);
                 break;
             // import csv file
-            case "import" :
+            case "import":
                 flag = false;
-                importFlight(options);
+                importFlights(options);
                 break;
             // export csv file
-            case "export" :
+            case "export":
                 flag = false;
                 exportFlight(options);
                 break;
@@ -56,21 +58,21 @@ public class FlightCommand {
         }
 
         // fix bug
-        if (flag){
-            if (options.length <= 2){
+        if (flag) {
+            if (options.length <= 2) {
                 getFlightById(options);
             } else {
-                switch (options[2].toLowerCase()){
+                switch (options[2].toLowerCase()) {
                     // book a certain number of passengers for the flight at the current ticket price
-                    case "book" :
+                    case "book":
                         book(options);
                         break;
                     // remove flight
-                    case "remove" :
+                    case "remove":
                         remove(options);
                         break;
                     // reset flight
-                    case "reset" :
+                    case "reset":
                         reset(options);
                         break;
                     // find flight by id
@@ -91,6 +93,12 @@ public class FlightCommand {
         System.out.println("-------------------------------------------------------");
         System.out.println("ID   Departure   Arrival     Source --> Destination");
         System.out.println("-------------------------------------------------------");
+
+        if (FlightScheduler.flights.size() == 0){
+            System.out.println("(None)");
+            System.out.println();
+            return;
+        }
 
         List<Flight> flights = new ArrayList<>();
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
@@ -114,13 +122,10 @@ public class FlightCommand {
         });
 
         for (Flight flight : flights) {
-            System.out.printf("%4s %-9s   %-9s   %s --> %s\n", flight.getId(),
-                    Utils.getPrintTime(flight.getTime()),
-                    Utils.getPrintTime(flight.getArrivedTime()),
-                    flight.getSource(), flight.getDestination());
-        }
-        if (FlightScheduler.flights.size() == 0){
-            System.out.println("(None)");
+            System.out.printf("%4s %-9s   %-9s   %s --> %s", flight.getId(),
+                    Utils.getPrintTime(Utils.captureName(flight.getTime())),
+                    Utils.getPrintTime(Utils.captureName(flight.getArrivedTime())),
+                    Utils.captureName(flight.getSource()), Utils.captureName(flight.getDestination()));
         }
 
     }
@@ -133,21 +138,20 @@ public class FlightCommand {
     public void addFlight(String[] options) {
 
         // check parameter number
-        if (options.length != 7) {
-            throw new RuntimeException("Usage: \n" +
-                    "FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+        if (options.length < 7) {
+            throw new RuntimeException("Usage:   FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
                     "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
         }
 
         // check source location
         String source = options[4];
-        if (!FlightScheduler.locations.containsKey(Utils.captureName(source.toLowerCase()))) {
+        if (!FlightScheduler.locations.containsKey(source.toLowerCase())) {
             throw new RuntimeException("Invalid starting location.");
         }
 
         // check destination location
         String destination = options[5];
-        if (!FlightScheduler.locations.containsKey(Utils.captureName(destination.toLowerCase()))) {
+        if (!FlightScheduler.locations.containsKey(destination.toLowerCase())) {
             throw new RuntimeException("Invalid ending location.");
         }
 
@@ -157,10 +161,20 @@ public class FlightCommand {
         }
 
         int id = FlightScheduler.flights.size();
-        String time = options[2] + " " + options[3];
+
+        String hour_minute = "";
+        if (options[3].length() < 5) {
+            hour_minute = "0" + options[3];
+        } else {
+            hour_minute = options[3];
+        }
+
+        String time = options[2].toLowerCase() + " " + hour_minute;
+        Utils.TimeFormat.format(options[3].split(":")[0]);
+        Utils.TimeFormat.format(options[3].split(":")[1]);
 
         // check time format
-        if (!Utils.p.matcher(time).matches()) {
+        if (!Utils.p.matcher(time.toLowerCase()).matches()) {
             throw new RuntimeException("Invalid departure time. Use the format <day_of_week> <hour:minute>, with 24h time.");
         }
 
@@ -314,13 +328,86 @@ public class FlightCommand {
         }
 
         System.out.println("Flight " + id);
-        System.out.printf("%-14s%s %s\n", "Departure: ", Utils.getPrintTime(flight.getTime()), flight.getSource());
+        System.out.printf("%-14s%s %s\n", "Departure: ", Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
         System.out.printf("%-14s%s %s\n", "Arrival: ", Utils.getPrintTime(flight.getArrivedTime()), flight.getDestination());
         System.out.printf("%-14s%,dkm\n", "Distance: ", Math.round(flight.getDistance()));
         System.out.printf("%-14s%dh %dm\n", "Duration: ", flight.getDuration() / 60, flight.getDuration() % 60);
         System.out.printf("%-14s%s\n", "Ticket Cost: ", "$" + Utils.doubleFormat.format(flight.getTicketPrice()));
         System.out.printf("%-14s%d/%d\n", "Passengers: ", flight.getBooked(), flight.getCapacity());
 
+    }
+
+    public void importFlights(String[] command) {
+        try {
+            if (command.length < 3) throw new FileNotFoundException();
+            BufferedReader br = new BufferedReader(new FileReader(new File(command[2])));
+            String line;
+            int count = 0;
+            int err = 0;
+
+            while ((line = br.readLine()) != null) {
+                String[] lparts = line.split(",");
+                if (lparts.length < 5) continue;
+                String[] dparts = lparts[0].split(" ");
+                if (dparts.length < 2) continue;
+                int booked = 0;
+
+                try {
+                    booked = Integer.parseInt(lparts[4]);
+
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
+                int status = addFlight(dparts[0], dparts[1], lparts[1], lparts[2], lparts[3], booked);
+                if (status < 0) {
+                    err++;
+                    continue;
+                }
+                count++;
+            }
+            br.close();
+            System.out.println("Imported "+count+" flight"+(count!=1?"s":"")+".");
+            if (err > 0) {
+                if (err == 1) System.out.println("1 line was invalid.");
+                else System.out.println(err+" lines were invalid.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file.");
+            return;
+        }
+    }
+
+    /**
+     * Add a flight to the database
+     * handle error cases and return status negative if error
+     * (different status codes for different messages)
+     * do not print out anything in this function
+     * @param date1 week
+     * @param date2 time
+     * @param start resource location
+     * @param end   destination location
+     * @param capacity pass
+     * @param booked check
+     * @return add status
+     */
+    public int addFlight(String date1, String date2, String start, String end, String capacity, int booked) {
+        Flight flight = new Flight();
+        int id = FlightScheduler.flights.size();
+        flight.setId(id);
+        flight.setTime(date1 + " " + date2);
+        flight.setSource(start);
+        flight.setDestination(end);
+        try {
+            flight.setCapacity(Integer.parseInt(capacity));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+        flight.setBooked(booked);
+
+        FlightScheduler.flights.put(id, flight);
+
+        return 1;
     }
 
     /**
@@ -355,7 +442,7 @@ public class FlightCommand {
                     Flight flight = new Flight(FlightScheduler.flights.size(), split[0], split[1], split[2], Integer.parseInt(split[3]), Integer.parseInt(split[4]));
 
                     // check location is in the database
-                    if (FlightScheduler.locations.containsKey(split[1]) && FlightScheduler.locations.containsKey(split[2])) {
+                    if (FlightScheduler.locations.containsKey(split[1].toLowerCase()) && FlightScheduler.locations.containsKey(split[2].toLowerCase())) {
                         FlightScheduler.flights.put(FlightScheduler.flights.size(), flight);
                         // right add 1
                         right++;
@@ -369,12 +456,16 @@ public class FlightCommand {
                 }
             }
 
-            System.out.println("Imported " + right + " flights.");
+            if (right == 1){
+                System.out.println("Imported " + right + " flight.");
+            }
+            if (right != 1){
+                System.out.println("Imported " + right + " flights.");
+            }
             if (error == 1) {
                 System.out.println(error + " line was invalid.");
             }
-            if (error > 1)
-            {
+            if (error > 1) {
                 System.out.println(error + " lines were invalid.");
             }
 
@@ -414,7 +505,12 @@ public class FlightCommand {
                 writer.newLine();
             }
             writer.close();
-            System.out.println("Exported " + FlightScheduler.flights.size() + " flight.");
+            if (FlightScheduler.flights.size() == 1){
+                System.out.println("Exported " + FlightScheduler.flights.size() + " flight.");
+            } else  {
+                System.out.println("Exported " + FlightScheduler.flights.size() + " flights.");
+            }
+
         } catch (IOException e) {
             // error process
             throw new RuntimeException("Error writing file.");

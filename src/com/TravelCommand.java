@@ -121,7 +121,7 @@ public class TravelCommand {
 
         // find source -> destination
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
-            if (entry.getValue().getSource().equals(source) && entry.getValue().getDestination().equals(destination)){
+            if (entry.getValue().getSource().equalsIgnoreCase(source) && entry.getValue().getDestination().equalsIgnoreCase(destination)){
                 List<Flight> path = new ArrayList<>();
                 path.add(entry.getValue());
                 visited.add(entry.getKey());
@@ -136,10 +136,10 @@ public class TravelCommand {
         // get all x
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
 
-            if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equals(source)){
+            if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equalsIgnoreCase(source)){
                 for (Map.Entry<Integer, Flight> entry1 : FlightScheduler.flights.entrySet()) {
                     // the location is right
-                    if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equals(entry.getValue().getDestination()) && entry1.getValue().getDestination().equals(destination)){
+                    if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equalsIgnoreCase(entry.getValue().getDestination()) && entry1.getValue().getDestination().equalsIgnoreCase(destination)){
                         // check time
                         if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getTime()) < 0) {
                             List<Flight> path = new ArrayList<>();
@@ -159,16 +159,16 @@ public class TravelCommand {
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
 
             // beijing tu shanghai
-            if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equals(source)){
+            if (!visited.contains(entry.getKey()) && entry.getValue().getSource().equalsIgnoreCase(source)){
 
                 for (Map.Entry<Integer, Flight> entry1 : FlightScheduler.flights.entrySet()) {
                     // the location is right
-                    if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equals(entry.getValue().getDestination())){
+                    if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equalsIgnoreCase(entry.getValue().getDestination())){
                         // check time
                         if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getTime()) < 0) {
 
                             for (Map.Entry<Integer, Flight> entry2 : FlightScheduler.flights.entrySet()) {
-                                if (!visited.contains(entry2.getKey()) && entry2.getValue().getSource().equals(entry1.getValue().getDestination()) && entry2.getValue().getDestination().equals(destination)){
+                                if (!visited.contains(entry2.getKey()) && entry2.getValue().getSource().equalsIgnoreCase(entry1.getValue().getDestination()) && entry2.getValue().getDestination().equalsIgnoreCase(destination)){
                                     if (Utils.getTimeDifferenceByTimeString(entry1.getValue().getArrivedTime(), entry2.getValue().getTime()) < 0){
                                         List<Flight> path = new ArrayList<>();
                                         path.add(entry.getValue());
@@ -285,7 +285,7 @@ public class TravelCommand {
     }
 
     public static void printFlight(Flight flight){
-        System.out.printf("%4s $%7s %s   %s   %s --> %s\n", flight.getId(), Utils.doubleFormat.format(flight.getTicketPrice()), Utils.getPrintTime(flight.getTime()), Utils.getPrintTime(flight.getArrivedTime()), flight.getSource(), flight.getDestination());
+        System.out.printf("%4s $%8s %s   %s   %s --> %s\n", flight.getId(), Utils.doubleFormat.format(flight.getTicketPrice()), Utils.getPrintTime(flight.getTime()), Utils.getPrintTime(flight.getArrivedTime()), flight.getSource(), flight.getDestination());
     }
 
     public static void printLayover(Flight flight1, Flight flight2) {
