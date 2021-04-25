@@ -33,6 +33,15 @@ public enum Week {
         return null;
     }
 
+    public static boolean contains(String value){
+        for (Week c : Week.values()) {
+            if (c.getName().equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String getName() {
         return name;
     }

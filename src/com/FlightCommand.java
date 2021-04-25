@@ -23,65 +23,89 @@ import java.util.Map;
  */
 public class FlightCommand {
 
-    public void flightCommand(String command) {
-        // list all available flights ordered by departure time, then departure location name
-        if ("flights".equals(command)) {
-            getAllFlights();
-            return;
-        }
-        String[] options = command.split(" ");
-        if (options.length < 2) {
-            throw new RuntimeException("Usage:\n" +
-                    "FLIGHT <id> [BOOK/REMOVE/RESET] [num]\n" +
-                    "FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
-                    "FLIGHT IMPORT/EXPORT <filename>");
-        }
-        boolean flag = true;
-        switch (options[1].toLowerCase()) {
-            // add flight
-            case "add":
-                flag = false;
-                addFlight(options);
-                break;
-            // import csv file
-            case "import":
-                flag = false;
-                importFlights(options);
-                break;
-            // export csv file
-            case "export":
-                flag = false;
-                exportFlight(options);
-                break;
-            default:
-                break;
-        }
+    /**
+     * FLIGHT ADD <departure time> <from> <to> <capacity>
+     * FLIGHT IMPORT/EXPORT <filename>
+     * FLIGHT <id>
+     * FLIGHT <id> BOOK <num>
+     * FLIGHT <id> REMOVE
+     * FLIGHT <id> RESET
+     *
+     * @param options command line
+     */
+    public void flightCommand(String[] options) {
 
-        // fix bug
-        if (flag) {
-            if (options.length <= 2) {
-                getFlightById(options);
-            } else {
-                switch (options[2].toLowerCase()) {
-                    // book a certain number of passengers for the flight at the current ticket price
-                    case "book":
-                        book(options);
-                        break;
-                    // remove flight
-                    case "remove":
-                        remove(options);
-                        break;
-                    // reset flight
-                    case "reset":
-                        reset(options);
-                        break;
-                    // find flight by id
-                    default:
+        try {
+            switch (options.length) {
+                case 0:
+                    throw new RuntimeException("Usage:\n" +
+                            "FLIGHT <id> [BOOK/REMOVE/RESET] [num]\n" +
+                            "FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+                            "FLIGHT IMPORT/EXPORT <filename>");
+                case 1:
+                    throw new RuntimeException("Usage:   FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+                            "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
+                    // flight id
+                case 2:
+                    getFlightById(options[1]);
+                    return;
+                /*
+                    flight id remove
+                    flight id reset
+                    flight import file.csv
+                    flight export file.csv
+                 */
+                case 3:
+                    switch (options[1].toLowerCase()){
+                        case "import":
+                            importFlights(options);
+                            return;
+                        case "export":
+                            exportFlight(options[2]);
+                            return;
+                        default:
+                            break;
+                    }
+                    switch (options[2].toLowerCase()) {
+                        case "remove":
+                            remove(options[1]);
+                            return;
+                        case "reset":
+                            reset(options[1]);
+                            return;
+                        case "book":
+                            book(options[1], 1);
+                            return;
+                        default:
+                            throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
+                    }
+
+                    // flight id book num
+                case 4:
+                    if ("book".equalsIgnoreCase(options[2])) {
+                        if (!Utils.isNumeric(options[3])) {
+                            throw new RuntimeException("Invalid number of passengers to book.");
+                        }
+                        book(options[1], Integer.parseInt(options[3]));
+                        return;
+                    } else {
                         throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
-                }
+                    }
+                case 5:
+                case 6:
+                    throw new RuntimeException("Usage:   FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
+                            "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
+                    // FLIGHT ADD <departure time> <from> <to> <capacity>
+                case 7:
+                    addFlight(options[2], options[3], options[4], options[5], options[6], 0);
+                    return;
+                default:
+                    throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
             }
-
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+
     }
 
     /**
@@ -96,7 +120,6 @@ public class FlightCommand {
 
         if (FlightScheduler.flights.size() == 0) {
             System.out.println("(None)");
-            System.out.println();
             return;
         }
 
@@ -108,14 +131,14 @@ public class FlightCommand {
             @Override
             public int compare(Flight f1, Flight f2) {
                 // asc by week
-                String week1 = f1.getTime().split(" ")[0];
-                String week2 = f2.getTime().split(" ")[0];
+                String week1 = f1.getWeek();
+                String week2 = f2.getWeek();
 
                 int result = Week.valueOf(week1).getIndex() - Week.valueOf(week2).getIndex();
 
                 // if week same
                 if (result == 0) {
-                    result = f1.getTime().split(" ")[1].compareTo(f2.getTime().split(" ")[1]);
+                    result = f1.getTime().compareTo(f2.getTime());
                 }
                 return result;
             }
@@ -123,7 +146,7 @@ public class FlightCommand {
 
         for (Flight flight : flights) {
             System.out.printf("%4s %-9s   %-9s   %s --> %s\n", flight.getId(),
-                    Utils.getPrintTime(Utils.captureName(flight.getTime())),
+                    Utils.getPrintTime(flight.getWeek() + " " + flight.getTime()),
                     Utils.getPrintTime(Utils.captureName(flight.getArrivedTime())),
                     Utils.captureName(flight.getSource()), flight.getDestination());
         }
@@ -131,70 +154,69 @@ public class FlightCommand {
     }
 
     /**
-     * add flight
+     * Add a flight to the database
+     * handle error cases and return status negative if error
+     * (different status codes for different messages)
+     * do not print out anything in this function
      *
-     * @param options add command options
+     * @param week        week
+     * @param time        time
+     * @param source      resource location
+     * @param destination destination location
+     * @param capacity    pass
+     * @param booked      check
+     * @return add status
      */
-    public void addFlight(String[] options) {
+    public void addFlight(String week, String time, String source, String destination, String capacity, int booked) {
 
-        // check parameter number
-        if (options.length < 7) {
-            throw new RuntimeException("Usage:   FLIGHT ADD <departure time> <from> <to> <capacity>\n" +
-                    "Example: FLIGHT ADD Monday 18:00 Sydney Melbourne 120");
-        }
-
-        // check source location
-        String source = options[4];
+        // check start
         if (!FlightScheduler.locations.containsKey(source.toLowerCase())) {
             throw new RuntimeException("Invalid starting location.");
         }
 
-        // check destination location
-        String destination = options[5];
+        // check destination
         if (!FlightScheduler.locations.containsKey(destination.toLowerCase())) {
             throw new RuntimeException("Invalid ending location.");
         }
 
-        // source and destination not allowed to be the same
+        // check source and destination is the same
         if (source.equalsIgnoreCase(destination)) {
             throw new RuntimeException("Source and destination cannot be the same place.");
         }
 
-        int id = FlightScheduler.flights.size();
-
-        String hour_minute = "";
-        if (options[3].length() < 5) {
-            hour_minute = "0" + options[3];
-        } else {
-            hour_minute = options[3];
-        }
-
-        String time = options[2].toLowerCase() + " " + hour_minute;
-        Utils.TimeFormat.format(options[3].split(":")[0]);
-        Utils.TimeFormat.format(options[3].split(":")[1]);
-
-        // check time format
-        if (!Utils.p.matcher(time.toLowerCase()).matches()) {
+        // check time
+        if (!(Week.contains(week) && Utils.isTime(time))) {
             throw new RuntimeException("Invalid departure time. Use the format <day_of_week> <hour:minute>, with 24h time.");
         }
 
-        // check runways
-        checkRunways(time, options[4]);
+        if (time.length() < 5) {
+            time = "0" + time;
+        }
 
         // check capacity
-        int capacity = 0;
-        try {
-            capacity = Integer.parseInt(options[6]);
-        } catch (NumberFormatException e) {
+        if (!Utils.isNumeric(capacity)) {
             throw new RuntimeException("Invalid positive integer capacity.");
         }
 
-        Flight flight = new Flight(id, time, source, destination, capacity, 0);
+        // check runways
+        checkRunways(week + " " + time, source);
 
+
+        // add flight
+        Flight flight = new Flight();
+        int id = FlightScheduler.flights.size();
+
+        flight.setId(id);
+        flight.setWeek(Utils.captureName(week));
+        flight.setTime(time);
+        flight.setSource(source);
+        flight.setDestination(destination);
+        flight.setCapacity(Integer.parseInt(capacity));
+        flight.setBooked(booked);
         FlightScheduler.flights.put(id, flight);
         System.out.println("Successfully added Flight " + id + ".");
-
     }
+
 
     /**
      * check the runways is it occupied
@@ -203,6 +225,7 @@ public class FlightCommand {
      * @param source source location name
      */
     public void checkRunways(String time, String source) {
+
         List<Flight> flights = new ArrayList<>();
 
         for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
@@ -213,7 +236,7 @@ public class FlightCommand {
         // flight add Tuesday 19:10 Dubai Beijing 120
         for (Flight flight : flights) {
             // if source is same and time difference less than 60, false
-            if (Math.abs(Utils.getTimeDifferenceByTimeString(flight.getTime(), time)) <= 60 && source.equals(flight.getSource())) {
+            if (Math.abs(Utils.getTimeDifferenceByTimeString(flight.getWeek() + " " + flight.getTime(), time)) <= 60 && source.equals(flight.getSource())) {
                 throw new RuntimeException("Scheduling conflict! This flight clashes with Flight " + flight.getId() + " departing from " + flight.getSource() + " on " + Utils.captureName(flight.getArrivedTime()) + ".");
             }
             // if arrived time is same and time difference less than 60, false
@@ -229,39 +252,27 @@ public class FlightCommand {
      * passenger. If the given number of bookings is more than the remaining capacity, only accept bookings
      * until the capacity is full.
      *
-     * @param options command options
+     * @param id     flight id
+     * @param booked booked number
      */
-    public void book(String[] options) {
+    public void book(String id, int booked) {
 
-        if (options.length < 3) {
-            throw new RuntimeException("not enough arguments");
-        }
-
-        int id = Integer.parseInt(options[1]);
-        int number;
-
-        // given the number
-        if (options.length > 3) {
-            try {
-                number = Integer.parseInt(options[3]);
-            } catch (Exception e) {
-                throw new RuntimeException("Invalid number of passengers to book.");
-            }
-        } else {
-            number = 1;
-        }
-        Flight flight = FlightScheduler.flights.get(id);
+        Flight flight = checkId(id);
 
         // record the booked before new book
         int bookedBefore = flight.getBooked();
 
         // calculate the total cost
-        double cost = flight.book(number);
+        double cost = flight.book(booked);
 
         // get after booked number
         int bookedAfter = flight.getBooked();
 
-        System.out.println("Booked " + (bookedAfter - bookedBefore) + " passengers on flight 0 for a total cost of $" + Utils.doubleFormat.format(cost));
+        if (bookedAfter - bookedBefore == 0){
+            System.out.println("Booked 0 passengers on flight 0 for a total cost of $0.00");
+        } else {
+            System.out.println("Booked " + (bookedAfter - bookedBefore) + " passengers on flight 0 for a total cost of $" + Utils.doubleFormat.format(cost));
+        }
 
         // if the flight is full
         if (bookedAfter == flight.getCapacity()) {
@@ -273,39 +284,30 @@ public class FlightCommand {
     /**
      * remove a flight from the schedule
      *
-     * @param options command options
+     * @param idString id
      */
-    public void remove(String[] options) {
+    public void remove(String idString) {
 
-        if (options.length < 2) {
-            throw new RuntimeException("not enough arguments");
-        }
+        Flight flight = checkId(idString);
 
-        int id = Integer.parseInt(options[1]);
-        Flight flight = FlightScheduler.flights.get(id);
-        FlightScheduler.flights.remove(Integer.parseInt(options[1]));
+        FlightScheduler.flights.remove(flight.getId());
         // Removed Flight 0, Mon 08:00 Mumbai --> NewDelhi, from the flight schedule.
-        System.out.println("Removed Flight " + id + ", " + Utils.getPrintTime(flight.getTime()) + " " + flight.getSource() + " --> " + flight.getDestination() + ", from the flight schedule");
+        System.out.println("Removed Flight " + flight.getId() + ", " + flight.getWeek().substring(0, 3) + " " + flight.getTime() + " " + flight.getSource() + " --> " + flight.getDestination() + ", from the flight schedule.");
     }
 
     /**
      * reset the number of passengers booked to 0, and the ticket price to its original state.
      *
-     * @param options command options
+     * @param idString id
      */
-    public void reset(String[] options) {
+    public void reset(String idString) {
 
-        if (options.length < 2) {
-            throw new RuntimeException("not enough arguments");
-        }
-
-        int id = Integer.parseInt(options[1]);
-        Flight flight = FlightScheduler.flights.get(id);
+        Flight flight = checkId(idString);
         flight.setBooked(0);
-        FlightScheduler.flights.put(id, flight);
+        FlightScheduler.flights.put(flight.getId(), flight);
 
         // Reset passengers booked to 0 for Flight 0, Mon 08:00 Mumbai --> NewDelhi.
-        System.out.println("Reset passengers booked to 0 for Flight " + id + ", " + Utils.getPrintTime(flight.getTime()) + " " + flight.getSource() + " --> " + flight.getDestination() + ".");
+        System.out.println("Reset passengers booked to 0 for Flight " + flight.getId() + ", " + flight.getWeek().substring(0, 3) + " " + flight.getTime() + " " + flight.getSource() + " --> " + flight.getDestination() + ".");
 
     }
 
@@ -313,22 +315,14 @@ public class FlightCommand {
      * view information about a flight (from->to, departure arrival times, current ticket price,
      * capacity, passengers booked)
      *
-     * @param options command options
+     * @param idString flight id
      */
-    public void getFlightById(String[] options) {
-        if (options.length < 2) {
-            throw new RuntimeException("not enough arguments");
-        }
+    public void getFlightById(String idString) {
 
-        int id = Integer.parseInt(options[1]);
-        Flight flight = FlightScheduler.flights.get(id);
+        Flight flight = checkId(idString);
 
-        if (flight == null) {
-            throw new RuntimeException("Invalid Flight ID.");
-        }
-
-        System.out.println("Flight " + id);
-        System.out.printf("%-14s%s %s\n", "Departure: ", Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
+        System.out.printf("Flight %d\n", flight.getId());
+        System.out.printf("%-14s%s %s %s\n", "Departure: ", flight.getWeek().substring(0, 3), flight.getTime(), flight.getSource());
         System.out.printf("%-14s%s %s\n", "Arrival: ", Utils.getPrintTime(flight.getArrivedTime()), flight.getDestination());
         System.out.printf("%-14s%,dkm\n", "Distance: ", Math.round(flight.getDistance()));
         System.out.printf("%-14s%dh %dm\n", "Duration: ", flight.getDuration() / 60, flight.getDuration() % 60);
@@ -337,9 +331,14 @@ public class FlightCommand {
 
     }
 
+    /**
+     * import flights from csv file
+     *
+     * @param command command options
+     */
     public void importFlights(String[] command) {
         try {
-            if (command.length < 3) throw new FileNotFoundException();
+            if (command.length < 2) throw new FileNotFoundException();
             BufferedReader br = new BufferedReader(new FileReader(new File(command[2])));
             String line;
             int count = 0;
@@ -359,7 +358,7 @@ public class FlightCommand {
                     continue;
                 }
 
-                int status = addFlight(dparts[0], dparts[1], lparts[1], lparts[2], lparts[3], booked);
+                int status = addFlightByExport(dparts[0], dparts[1], lparts[1], lparts[2], lparts[3], booked);
                 if (status < 0) {
                     err++;
                     continue;
@@ -378,117 +377,69 @@ public class FlightCommand {
         }
     }
 
-    /**
-     * Add a flight to the database
-     * handle error cases and return status negative if error
-     * (different status codes for different messages)
-     * do not print out anything in this function
-     *
-     * @param date1    week
-     * @param date2    time
-     * @param start    resource location
-     * @param end      destination location
-     * @param capacity pass
-     * @param booked   check
-     * @return add status
-     */
-    public int addFlight(String date1, String date2, String start, String end, String capacity, int booked) {
+    private int addFlightByExport(String week, String time, String source, String destination, String capacity, int booked) {
+        // check start
+        if (!FlightScheduler.locations.containsKey(source.toLowerCase())) {
+            return -1;
+        }
+
+        // check destination
+        if (!FlightScheduler.locations.containsKey(destination.toLowerCase())) {
+            return -1;
+        }
+
+        // check source and destination is the same
+        if (source.equalsIgnoreCase(destination)) {
+            return -1;
+        }
+
+        // check time
+        if (!(Week.contains(week) && Utils.isTime(time))) {
+            return -1;
+        }
+
+        if (time.length() < 5) {
+            time = "0" + time;
+        }
+
+        // check capacity
+        if (!Utils.isNumeric(capacity)) {
+            return -1;
+        }
+
+        // check runways
+        try {
+            checkRunways(week + " " + time, source);
+        } catch (Exception e){
+            return -1;
+        }
+
+
+        // add flight
         Flight flight = new Flight();
         int id = FlightScheduler.flights.size();
+
         try {
             flight.setId(id);
-            flight.setTime(date1 + " " + date2);
-            flight.setSource(start);
-            flight.setDestination(end);
+            flight.setWeek(Utils.captureName(week));
+            flight.setTime(time);
+            flight.setSource(source);
+            flight.setDestination(destination);
             flight.setCapacity(Integer.parseInt(capacity));
             flight.setBooked(booked);
-            FlightScheduler.flights.put(id, flight);
         } catch (Exception e) {
             return -1;
         }
+        FlightScheduler.flights.put(id, flight);
         return 1;
-    }
-
-    /**
-     * import flights from csv file
-     *
-     * @param options command options
-     */
-    public void importFlight(String[] options) {
-        if (options.length < 3) {
-            throw new RuntimeException("not enough arguments");
-        }
-
-        String path = options[2];
-
-        FileReader fr;
-        try {
-            // 1.create FileReader, support datasource
-            fr = new FileReader(path);
-            // 2.buffer reader
-            BufferedReader br = new BufferedReader(fr);
-
-            String line = "";
-            int right = 0;
-            int error = 0;
-
-
-            while ((line = br.readLine()) != null) {
-                // contains the line format
-                if (Utils.pTime.matcher(line).matches()) {
-                    // add flight
-                    String[] split = line.split(",");
-                    Flight flight = new Flight(FlightScheduler.flights.size(), split[0], split[1], split[2], Integer.parseInt(split[3]), Integer.parseInt(split[4]));
-
-                    // check location is in the database
-                    if (FlightScheduler.locations.containsKey(split[1].toLowerCase()) && FlightScheduler.locations.containsKey(split[2].toLowerCase())) {
-                        FlightScheduler.flights.put(FlightScheduler.flights.size(), flight);
-                        // right add 1
-                        right++;
-                    } else {
-                        error++;
-                    }
-
-                } else {
-                    // error add 1
-                    error++;
-                }
-            }
-
-            if (right == 1) {
-                System.out.println("Imported " + right + " flight.");
-            }
-            if (right != 1) {
-                System.out.println("Imported " + right + " flights.");
-            }
-            if (error == 1) {
-                System.out.println(error + " line was invalid.");
-            }
-            if (error > 1) {
-                System.out.println(error + " lines were invalid.");
-            }
-
-            // 3.release
-            br.close();
-            fr.close();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading file.");
-        }
-
     }
 
     /**
      * export flights to csv file
      *
-     * @param options command options
+     * @param path command options
      */
-    public void exportFlight(String[] options) {
-        if (options.length < 3) {
-            throw new RuntimeException("not enough arguments");
-        }
-
-        String path = options[2];
+    public void exportFlight(String path) {
 
         try {
             // create buffer write, use path
@@ -499,7 +450,7 @@ public class FlightCommand {
             for (Map.Entry<Integer, Flight> integerFlightEntry : FlightScheduler.flights.entrySet()) {
                 Flight flight = integerFlightEntry.getValue();
                 // format style
-                String line = flight.getTime() + "," + flight.getSource() + "," + flight.getDestination() + "," + flight.getCapacity() + "," + flight.getBooked();
+                String line = flight.getWeek() + " " + flight.getTime() + "," + flight.getSource() + "," + flight.getDestination() + "," + flight.getCapacity() + "," + flight.getBooked();
                 writer.write(line);
                 writer.newLine();
             }
@@ -514,5 +465,29 @@ public class FlightCommand {
             // error process
             throw new RuntimeException("Error writing file.");
         }
+    }
+
+    /**
+     * check id is exist or id is a number
+     *
+     * @param idString check str
+     * @return if is id return id
+     * else return flight
+     */
+    public Flight checkId(String idString) {
+
+        // check id
+        if (!Utils.isNumeric(idString)) {
+            throw new RuntimeException("Invalid Flight ID.");
+        }
+
+        int id = Integer.parseInt(idString);
+        Flight flight = FlightScheduler.flights.get(id);
+
+        // check result
+        if (flight == null) {
+            throw new RuntimeException("Invalid Flight ID.");
+        }
+        return flight;
     }
 }

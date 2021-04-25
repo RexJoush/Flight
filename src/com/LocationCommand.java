@@ -37,7 +37,7 @@ public class LocationCommand {
             arrivals(options);
         } else {
             if (options.length < 3) {
-                if ("location".equals(options[1])) {
+                if ("location".equals(options[0])) {
                     getLocationByName(options[1]);
                 } else {
                     throw new RuntimeException("Invalid command. Type 'help' for a list of commands");
@@ -339,17 +339,24 @@ public class LocationCommand {
         System.out.println("ID   Time        Departure/Arrival to/from Location");
         System.out.println("-------------------------------------------------------");
 
+        int count = 0;
+
         for (Flight flight : flights) {
             // find All source from this place
-            if (flight.getSource().equals(options[1])) {
+            if (flight.getSource().equalsIgnoreCase(options[1])) {
                 System.out.printf("%4s %-12sDeparture to %s\n", flight.getId(),
-                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getDestination());
+                        flight.getWeek().substring(0, 3) + " " + flight.getTime(), flight.getDestination());
+                count++;
             }
             // find All source from this place
-            if (flight.getDestination().equals(options[1])) {
+            if (flight.getDestination().equalsIgnoreCase(options[1])) {
                 System.out.printf("%4s %-12sArrival from %s\n", flight.getId(),
-                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
+                        flight.getWeek().substring(0, 3) + " " + flight.getTime(), flight.getSource());
+                count++;
             }
+        }
+        if (count == 0) {
+            System.out.println("(None)");
         }
     }
 
@@ -377,9 +384,9 @@ public class LocationCommand {
         int count = 0;
         for (Flight flight : flights) {
             // find All source from this place
-            if (flight.getSource().equals(options[1])) {
+            if (flight.getSource().equalsIgnoreCase(options[1])) {
                 System.out.printf("%4s %-12sDeparture to %s\n", flight.getId(),
-                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getDestination());
+                        flight.getWeek().substring(0, 3) + " " + flight.getTime(), flight.getDestination());
                 count++;
             }
         }
@@ -412,9 +419,9 @@ public class LocationCommand {
 
         for (Flight flight : flights) {
             // find All source from this place
-            if (flight.getDestination().equals(options[1])) {
+            if (flight.getDestination().equalsIgnoreCase(options[1])) {
                 System.out.printf("%4s %-12sArrival from %s\n", flight.getId(),
-                        Utils.getPrintTime(Utils.captureName(flight.getTime())), flight.getSource());
+                        flight.getWeek().substring(0, 3) + " " + flight.getTime(), flight.getSource());
                 count++;
             }
         }
@@ -438,14 +445,14 @@ public class LocationCommand {
             @Override
             public int compare(Flight f1, Flight f2) {
                 // asc by week
-                String week1 = f1.getTime().split(" ")[0];
-                String week2 = f2.getTime().split(" ")[0];
+                String week1 = f1.getWeek();
+                String week2 = f2.getWeek();
 
                 int result = Week.valueOf(week1).getIndex() - Week.valueOf(week2).getIndex();
 
                 // if week same
                 if (result == 0) {
-                    result = f1.getTime().split(" ")[1].compareTo(f2.getTime().split(" ")[1]);
+                    result = f1.getTime().compareTo(f2.getTime());
                 }
                 return result;
             }

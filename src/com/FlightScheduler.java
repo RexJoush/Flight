@@ -49,10 +49,10 @@ public class FlightScheduler {
             try {
                 switch (s1[0].toLowerCase()){
                     case "flight" :
-                        flightService.flightCommand(s);
+                        flightService.flightCommand(s1);
                         break;
                     case "flights" :
-                        flightService.flightCommand("flights");
+                        flightService.getAllFlights();
                         break;
                     case "departures":
                     case "arrivals":
@@ -61,7 +61,7 @@ public class FlightScheduler {
                         locationService.locationCommand(s);
                         break;
                     case "locations":
-                        locationService.locationCommand("locations");
+                        locationService.getAllLocations();
                         break;
                     case "travel":
                         TravelCommand.travelCommand(s);

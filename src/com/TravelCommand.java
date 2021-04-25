@@ -53,12 +53,12 @@ public class TravelCommand {
 
 
         // source is not in database
-        if (!FlightScheduler.locations.containsKey(options[1])) {
+        if (!FlightScheduler.locations.containsKey(options[1].toLowerCase())) {
             throw new RuntimeException("Starting location not found.");
         }
 
         // destination is not in database
-        if (!FlightScheduler.locations.containsKey(options[2])) {
+        if (!FlightScheduler.locations.containsKey(options[2].toLowerCase())) {
             throw new RuntimeException("Ending location not found.");
         }
 
@@ -105,7 +105,6 @@ public class TravelCommand {
             printResult(ways, 1);
         }
 
-
     }
 
     /**
@@ -141,7 +140,7 @@ public class TravelCommand {
                     // the location is right
                     if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equalsIgnoreCase(entry.getValue().getDestination()) && entry1.getValue().getDestination().equalsIgnoreCase(destination)){
                         // check time
-                        if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getTime()) < 0) {
+                        if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getWeek() + " " + entry1.getValue().getTime()) < 0) {
                             List<Flight> path = new ArrayList<>();
                             path.add(entry.getValue());
                             path.add(entry1.getValue());
@@ -165,11 +164,11 @@ public class TravelCommand {
                     // the location is right
                     if (!visited.contains(entry1.getKey()) && entry1.getValue().getSource().equalsIgnoreCase(entry.getValue().getDestination())){
                         // check time
-                        if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getTime()) < 0) {
+                        if (Utils.getTimeDifferenceByTimeString(entry.getValue().getArrivedTime(), entry1.getValue().getWeek() + " " + entry1.getValue().getTime()) < 0) {
 
                             for (Map.Entry<Integer, Flight> entry2 : FlightScheduler.flights.entrySet()) {
                                 if (!visited.contains(entry2.getKey()) && entry2.getValue().getSource().equalsIgnoreCase(entry1.getValue().getDestination()) && entry2.getValue().getDestination().equalsIgnoreCase(destination)){
-                                    if (Utils.getTimeDifferenceByTimeString(entry1.getValue().getArrivedTime(), entry2.getValue().getTime()) < 0){
+                                    if (Utils.getTimeDifferenceByTimeString(entry1.getValue().getArrivedTime(), entry2.getValue().getWeek() + " " + entry2.getValue().getTime()) < 0){
                                         List<Flight> path = new ArrayList<>();
                                         path.add(entry.getValue());
                                         path.add(entry1.getValue());
@@ -189,61 +188,6 @@ public class TravelCommand {
         }
 
         return answer;
-    }
-
-    // get flight graph
-    public Map<String, Integer> graph = getInitGraph();
-
-    // visited point list
-    public Set<Flight> visited = new HashSet<>();
-
-    // probably path
-    public List<Flight> path = new ArrayList<>();
-
-
-    /**
-     * find path core algorithm
-     * @param flight current visit flight
-     */
-    public void dfs(Flight flight){
-        // add visited flight
-        visited.add(flight);
-
-        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
-            if (entry.getValue().getSource().equals(flight.getSource())){
-                if (entry.getValue().getDestination().equals(flight.getDestination())){
-                    path.add(entry.getValue());
-                    continue;
-                }
-                if (!visited.contains(entry.getValue())){
-                    dfs(flight);
-                }
-            }
-        }
-
-        visited.remove(flight);
-    }
-
-
-
-    /**
-     * init flight graph
-     *
-     * if beijing --> shanghai has a flight
-     * then graph will have an item (beijing,shanghai) -> <flight_id>
-     * @return graph
-     */
-    public Map<String, Integer> getInitGraph() {
-        Map<String, Integer> graph = new HashMap<>();
-
-        for (Map.Entry<Integer, Flight> entry : FlightScheduler.flights.entrySet()) {
-            String source = entry.getValue().getSource();
-            String destination = entry.getValue().getDestination();
-            Integer id = entry.getKey();
-            graph.put(source + "," + destination, id);
-        }
-
-        return graph;
     }
 
 
@@ -285,11 +229,11 @@ public class TravelCommand {
     }
 
     public static void printFlight(Flight flight){
-        System.out.printf("%4s $%8s %s   %s   %s --> %s\n", flight.getId(), Utils.doubleFormat.format(flight.getTicketPrice()), Utils.getPrintTime(flight.getTime()), Utils.getPrintTime(flight.getArrivedTime()), flight.getSource(), flight.getDestination());
+        System.out.printf("%4s $%8s %s   %s   %s --> %s\n", flight.getId(), Utils.doubleFormat.format(flight.getTicketPrice()), flight.getWeek().substring(0,3) + " " + flight.getTime(), Utils.getPrintTime(flight.getArrivedTime()), flight.getSource(), flight.getDestination());
     }
 
     public static void printLayover(Flight flight1, Flight flight2) {
-        int timeDifference = Math.abs(Utils.getTimeDifferenceByTimeString(flight1.getArrivedTime(), flight2.getTime()));
+        int timeDifference = Math.abs(Utils.getTimeDifferenceByTimeString(flight1.getArrivedTime(), flight2.getWeek() + " " + flight2.getTime()));
         System.out.printf("LAYOVER %sh %sm at %s\n", timeDifference / 60, timeDifference % 60, flight1.getDestination());
     }
 }

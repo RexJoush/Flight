@@ -3,6 +3,7 @@ package com;
 public class Flight {
 
     private int id;             // id
+    private String week;        // departure week
     private String time;        // departure time
     private String source;      // source location
     private String destination; // destination location
@@ -22,7 +23,7 @@ public class Flight {
 
     // get the flight arrived time
     public String getArrivedTime(){
-        return Utils.getManyMinuteAfter(this.getTime(), this.getDuration());
+        return Utils.getManyMinuteAfter(this.getWeek() + " " + this.getTime(), this.getDuration());
     }
 
     //implement the ticket price formula
@@ -100,17 +101,11 @@ public class Flight {
      */
 
     // constructor with id
-    public Flight(int id, String time, String source, String destination, int capacity, int booked) {
-        this.id = id;
-        this.time = time;
-        this.source = source;
-        this.destination = destination;
-        this.capacity = capacity;
-        this.booked = booked;
-    }
 
-    // constructor without id
-    public Flight(String time, String source, String destination, int capacity, int booked) {
+
+    public Flight(int id, String week, String time, String source, String destination, int capacity, int booked) {
+        this.id = id;
+        this.week = week;
         this.time = time;
         this.source = source;
         this.destination = destination;
@@ -127,6 +122,14 @@ public class Flight {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getWeek() {
+        return week;
+    }
+
+    public void setWeek(String week) {
+        this.week = week;
     }
 
     public String getTime() {

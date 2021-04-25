@@ -141,4 +141,42 @@ public class Utils {
     public static String captureName(String str) {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
+
+
+    /**
+     * check str is or not a number
+     * @param str check string
+     * @return check result
+     *          1.001 true
+     *          128971 true
+     *          21b31 false
+     */
+    public static boolean isNumeric(final String str) {
+        // null or empty
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            try {
+                Double.parseDouble(str);
+                return true;
+            } catch (NumberFormatException ex) {
+                try {
+                    Float.parseFloat(str);
+                    return true;
+                } catch (NumberFormatException exx) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    public static boolean isTime(String time){
+
+        return time.matches("\\d+:\\d+");
+    }
 }
