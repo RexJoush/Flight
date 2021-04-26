@@ -198,9 +198,6 @@ public class FlightCommand {
             throw new RuntimeException("Invalid positive integer capacity.");
         }
 
-        // check runways
-        checkRunways(week + " " + time, source);
-
 
         // add flight
         Flight flight = new Flight();
@@ -213,6 +210,18 @@ public class FlightCommand {
         flight.setDestination(destination);
         flight.setCapacity(Integer.parseInt(capacity));
         flight.setBooked(booked);
+
+        Location location = new Location();
+        String arrivalSpace = location.hasRunwayArrivalSpace(flight);
+        String departureSpace = location.hasRunwayDepartureSpace(flight);
+        if (arrivalSpace != null){
+            throw new RuntimeException(arrivalSpace);
+        }
+        if (departureSpace != null){
+            throw new RuntimeException(departureSpace);
+        }
+
+
         FlightScheduler.flights.put(id, flight);
         System.out.println("Successfully added Flight " + id + ".");
     }
